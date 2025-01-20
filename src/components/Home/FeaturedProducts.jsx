@@ -1,6 +1,6 @@
 import React from 'react'
 import './FeaturedProducts.css'
-import ProductCard from './ProductCard';
+import ProductCard from '../Products/ProductCard';
 
 const FeaturedProducts = () => {
   return (
@@ -11,9 +11,7 @@ const FeaturedProducts = () => {
                 <ProductCard />
                 <ProductCard />
                 <ProductCard />
-                <ProductCard />
-                <ProductCard />
-                <ProductCard />
+             
         </div>
     </section>
   );
