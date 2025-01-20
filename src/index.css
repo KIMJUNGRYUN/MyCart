@@ -11,6 +11,9 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "GmarketSansMedium", sans-serif;
+
+  word-break: keep-all;
+  /* 글자 안떨어지게 */
 }
 
 body {
@@ -22,6 +25,7 @@ body {
   display: flex;
   align-items: center;
 }
+
 a {
   font-size: inherit;
   font-weight: 500;
