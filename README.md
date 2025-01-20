@@ -1,4 +1,4 @@
-## 쇼핑물 
+## myCart 프로젝트
 
 ```react
 $ npm create vite
