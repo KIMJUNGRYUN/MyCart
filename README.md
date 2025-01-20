@@ -1450,3 +1450,42 @@ export default LoginPage;
 
 ![LoginPage](https://github.com/user-attachments/assets/842eb416-1546-4855-9f93-20e8e0f382aa)
 
+- JavaScript 를 사용 할 때에는, 우리가 특정 DOM 을 선택해야 하는 상황에 getElementById, querySelector 같은 DOM Selector 함수를 사용해서 DOM 을 선택.
+- 리액트를 사용하는 프로젝트에서도 가끔씩 DOM 을 직접 선택해야 하는 상황이 발생 할 때도 있음.
+  - 그럴 땐, 리액트에서 ref 라는 것을 사용.
+- 함수형 컴포넌트에서 ref 를 사용 할 때에는 useRef 라는 Hook 함수를 사용.
+
+- **로그인페이지에서 useRef 사용**
+
+```react
+const LoginPage = () => {
+	const passwordRef = useRef(null);
+```
+
+- 입력 패스워드 태그에 ref를 추가하고 아래에 버튼 2개를 추가
+
+```react
+<input
+							type='password'
+							ref={passwordRef}
+							id='password'
+							className='form_text_input'
+							placeholder='패스워드 입력...'
+						/>
+						<button type='button' onClick={() => console.log(passwordRef.current)}>
+							비밀번호 숨기기
+						</button>
+						<button type='button' onClick={() => (passwordRef.current.type = 'text')}>
+			비밀번호 보이게
+		</button>
+```
+
+```react
+	
+```
+
+
+![password](https://github.com/user-attachments/assets/a086ef86-3842-403f-a307-cb0454abed4e)
+
+<hr>
+
