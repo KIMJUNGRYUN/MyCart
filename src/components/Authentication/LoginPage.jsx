@@ -9,11 +9,14 @@ const LoginPage = () => {
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	  } = useForm();
 
-	const submitData = (formData) => console.log(formData);
-	  
+	const submitData = (formData) => {
+		console.log(formData);
+		reset();
+	}
 	
 	// const [user, setUser] = useState({
 	// 	email: '',
@@ -38,22 +41,34 @@ const LoginPage = () => {
 					<div>
 						<label htmlFor='email'>Email</label>
 						<input
-							{...register('email',{required: '이메일을 입력해주세요. '})}
-			
+							{...register('email',{
+								required: '이메일을 입력해주세요.', 
+								pattern: {
+									value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+									message: "이메일 형식에 맞게 입력해주세요."
+								},
+							})}
+								
 							// onChange value 둘 다 해결
+							id='email'
 							className='form_text_input'
 							placeholder='이메일 입력...'
 						/>
-						
+						{errors.email && <em className='form_error'>{errors.email.message}</em>}
 					</div>  
 					<div>
 						<label htmlFor='password'>Password</label>
 						<input
 							// ref={passwordRef}
-							{...register('password')}
+							{...register('password', {
+								required: '패스워드를 입력해주세요.', 
+								minLength: {value: 4, message: '패스워드는 최소 4자 이상.'},
+							})}
+							id='password'
 							className='form_text_input'
 							placeholder='패스워드'
 						/>	
+						{errors.password && <em className='form_error'>{errors.password.message}</em>}
 						{/* <button type='button'
 								onClick={() => (passwordRef.current.type = "text")} >
 								비밀번호 보이게
@@ -65,8 +80,9 @@ const LoginPage = () => {
 						
 					</div>
 			
-					<button type='submit'
-							className='search_button form_submit'>
+					<button 
+						type='submit' 
+						className='search_button form_submit'>
 						Submit
 					</button>
 				</div>
