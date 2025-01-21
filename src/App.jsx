@@ -1,6 +1,7 @@
 
 import './App.css'
 import LoginPage from './components/Authentication/LoginPage'
+import SignupPage from './components/Authentication/SignupPage'
 import CartPage from './components/Cart/CartPage'
 
 import HomePage from './components/Home/HomePage'
@@ -20,7 +21,8 @@ const App = () => {
         {/* <SingleProductPage /> */}
         {/* <CartPage /> */}
         {/* <MyOrderPage /> */}
-        <LoginPage />
+        {/* <LoginPage /> */}
+        <SignupPage />
       </main>
     </div>
   );
