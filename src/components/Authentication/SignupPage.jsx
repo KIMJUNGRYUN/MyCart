@@ -29,6 +29,7 @@ const SignupPage = () => {
 				<div className='image_input_section'>
 					<div className='image_preview'>
 						<img src={profilePic ? URL.createObjectURL(profilePic) : user} id='file-ip-1-preview' />
+
 					</div>
 					<label htmlFor='file-ip-1' className='image_label'>
 						이미지 업로드
@@ -36,6 +37,7 @@ const SignupPage = () => {
 					<input
                         onChange={(e) => setProfilePic(e.target.files[0])}
 						type='file'
+						accept='image/*'
 						id='file-ip-1'
 						className='image_input'
 					/>
