@@ -1,4 +1,4 @@
-## 쇼핑물 
+## myCart 프로젝트
 
 ```react
 $ npm create vite
@@ -696,5 +696,796 @@ export default ProductCard;
 
 <hr>
 
+# 상페이지(ProductsPage)
 
+![PRODUCT DETAIL](https://github.com/user-attachments/assets/75535b5b-cf0b-490e-a8f3-1bd41d408ca6)
+
+
+- ProductsPage.jsx
+
+```react
+const ProductsPage = () => {
+	return (
+		<section className='products_page'>
+			{/* 왼쪽 카테고리 */}
+			{/* 상품목록 */}
+		</section>
+	);
+};
+
+export default ProductsPage;
+```
+
+- ProductPage.css
+
+```css
+.products_page {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    padding: 20px;
+}
+```
+
+![Products details](https://github.com/user-attachments/assets/37519420-7b69-4cfa-92a4-354691986318)
+
+- ProductsSidebar.jsx
+
+```react
+import './ProductsSidebar.css';
+import rocket from '../../assets/rocket.png';
+import LinkWithIcon from '../Navbar/LinkWithIcon';
+
+const ProductsSidebar = () => {
+	return (
+		<aside className='products_sidebar'>
+			<h2>카테고리</h2>
+
+			<div className='category_links'>
+				<LinkWithIcon
+					title='전자제품'
+					link='products?category=electronics'
+					emoji={rocket}
+					sidebar={true}
+				/>
+			</div>
+		</aside>
+	);
+};
+
+export default ProductsSidebar;
+```
+
+- ProductsSidebar.css
+
+```css
+.products_sidebar {
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.products_sidebar h2 {
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+```
+
+- ProductList.jsx
+
+```react
+import './ProductsList.css';
+import ProductCard from './ProductCard';
+
+const ProductsList = () => {
+	return (
+		<section className='products_list_section'>
+			<header className='align_center products_list_header'>
+				<h2>상품목록</h2>
+				<select name='sort' id='' className='products_sorting'>
+					<option value=''>정렬방법</option>
+					<option value='price desc'>가격높은순</option>
+					<option value='price asc'>가격낮은순</option>
+					<option value='rate desc'>평점높은순</option>
+					<option value='rate asc'>평점낮은순</option>
+				</select>
+			</header>
+
+			<div className='products_list'>
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+				<ProductCard />
+			</div>
+		</section>
+	);
+};
+
+export default ProductsList;
+```
+
+- ProductList.css
+
+```css
+.products_list_section {
+    padding: 10px;
+    padding-left: 30px;
+}
+
+.products_list_header {
+    justify-content: space-between;
+}
+
+.products_list_header h2 {
+    font-size: 26px;
+}
+
+.products_sorting {
+    font-size: 18px;
+    font-weight: 500;
+    font-family: inherit;
+    height: 35px;
+    padding: 0 5px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+.products_list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+```
+
+- App.jsx에 ProductsPage 보여주기.
+
+```react
+const App = () => {
+	return (
+		<div className='app'>
+			<Navbar />
+			<main>
+				{/* <HomePage /> */}
+				<ProductsPage />
+			</main>
+		</div>
+	);
+};
+```
+
+<hr>
+
+# SingleProductPage
+
+![SingleProduct](https://github.com/user-attachments/assets/5e71ac2b-0395-4ecb-af3b-271c5073dcf0)
+
+- SingleProductPage.jsx
+
+```react
+import './SingleProductPage.css';
+
+const product = {
+	id: 1,
+	title: '상품 타이틀',
+	description:
+		'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime aliquid rerum a? Fugiat soluta facilis deleniti voluptatibus ab architecto dolores a, vero, beatae veniam error doloribus quia laudantium? Error fuga consequuntur quia accusantium? Consequatur modi laboriosam saepe culpa, ab atque.',
+	price: 9900,
+	images: [
+		'https://via.placeholder.com/500x500?text=Product+Image+1',
+		'https://via.placeholder.com/500x500?text=Product+Image+2',
+		'https://via.placeholder.com/500x500?text=Product+Image+3',
+		'https://via.placeholder.com/500x500?text=Product+Image+4',
+	],
+	stock: 10,
+};
+
+const SingleProductPage = () => {
+	const [selectedImage, setSelectedImage] = useState(0);
+	return (
+		<section className='align_center single_product'>
+			<div className='align_center'>
+				<div className='single_product_thumbnails'>
+					{product.images.map((image, index) => (
+						<img
+							src={image}
+							alt={product.title}
+							className={selectedImage === index ? 'selected_image' : ''}
+							onClick={() => setSelectedImage(index)}
+						/>
+					))}
+				</div>
+
+				<img
+					src={product.images[selectedImage]}
+					alt={product.title}
+					className='single_product_display'
+				/>
+			</div>
+
+			<div className='single_product_details'>
+
+			</div>
+		</section>
+	);
+};
+
+export default SingleProductPage;
+```
+
+- App.jsx
+
+```react
+			<main>
+				{/* <HomePage /> */}
+				{/* <ProductsPage /> */}
+				<SingleProductPage />
+			</main>
+```
+
+- SingleProductPage.css
+
+```css
+.single_product {
+    justify-content: center;
+    padding: 32px 48px;
+}
+
+.single_product_thumbnails {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 8px;
+    margin: 16px;
+}
+
+.single_product_thumbnails img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.single_product_display {
+    width: 600px;
+    height: 600px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.selected_image {
+    transform: scale(1.12);
+}
+```
+
+![images](https://github.com/user-attachments/assets/2a887a2b-6d28-4a65-9e27-7be8a30eeefa)
+
+<hr>
+
+# SingleProductPage(상품 디테일)
+
+- SingleProductPage.jsx
+
+```react
+<div className='single_product_details'>
+				<h1 className='single_product_title'>{product.title}</h1>
+				<p className='single_product_description'>{product.description}</p>
+				<p className='single_product_price'>￦ {product.price.toLocaleString('ko-KR')} 원</p>
+
+				<h2 className='quantity_title'>구매개수:</h2>
+				<div className='align_center quantity_input'>
+                       {/* <QuantityInput /> */}
+                </div>
+
+				<button className='search_button add_cart'>장바구니 추가</button>
+			</div>
+```
+
+- SingleProductPage.css
+
+```react
+.single_product_details {
+	width: 35%;
+	padding: 16px 24px;
+}
+
+.single_product_title {
+	margin-bottom: 16px;
+	font-size: 32px;
+}
+
+.single_product_description {
+	margin-bottom: 16px;
+	line-height: 1.4;
+}
+
+.single_product_price {
+	margin-bottom: 16px;
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.quantity_title {
+	font-size: 20px;
+	font-weight: 700;
+	margin-bottom: 3px;
+}
+
+.quantity_input {
+	font-size: 20px;
+	font-weight: 700;
+	margin: 5px 0 16px;
+}
+
+.add_cart {
+	width: fit-content;
+	padding: 8px 18px;
+}
+```
+
+![title](https://github.com/user-attachments/assets/65e007d9-9f61-4273-8286-97271a7dc330)
+
+<hr>
+
+# QuantityInput 컴포넌트
+
+
+![Quan](https://github.com/user-attachments/assets/223b5e73-dda8-4a33-9057-1b6da5146c89)
+
+- 구매 개수와 장바구니 추가 사이의 + - 버튼과 갯수
+
+```react
+<div className='align_center quantity_input'>
+					<QuantityInput />
+				</div>
+```
+
+- QuantityInput.jsx
+
+```react
+import "./QuantityInput.css";
+
+const QuantityInput = () => {
+    return (
+        <>
+            <button className='quantity_input_button' disabled>
+                {" "}
+                -{" "}
+            </button>
+            <p className='quantity_input_count'>1</p>
+            <button className='quantity_input_button'> + </button>
+        </>
+    );
+};
+
+export default QuantityInput;
+```
+
+- QuantityInput.css
+
+```css
+.quantity_input_button {
+    width: 35px;
+    height: 35px;
+    font-size: 25px;
+    background-color: #ff8848;
+    color: #fff;
+    border: none;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.quantity_input_button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.quantity_input_count {
+    margin: 0 40px;
+    text-align: center;
+}
+​
+```
+
+<hr>
+
+# 장바구니 Cart 페이지
+
+![CartPage](https://github.com/user-attachments/assets/ec547b3d-34c2-49ec-925d-156d4a08c8b0)
+
+
+- CartPage.jsx
+
+```react
+import './CartPage.css';
+import remove from '../../assets/remove.png';
+import user from '../../assets/user.webp';
+import Table from '../Common/Table';
+import QuantityInput from '../SingleProduct/QuantityInput';
+
+const CartPage = () => {
+	return (
+		<section className='align_center cart_page'>
+			<div className='align_center user_info'>
+				<img src={user} alt='user profile' />
+				<div>
+					<p className='user_name'>Dooly</p>
+					<p className='user_email'>dooly@naver.com</p>
+				</div>
+			</div>
+
+			<Table headings={['상품', '가격', '구매수량', '총 금액', '상품삭제']}>
+				<tbody>
+					<tr>
+						<td>iPhone 14</td>
+						<td>1200,000 원</td>
+						<td className='align_center table_quantity_input'>
+							<QuantityInput />
+						</td>
+						<td>1200,000 원</td>
+						<td>
+							<img src={remove} alt='remove icon' className='cart_remove_icon' />
+						</td>
+					</tr>
+				</tbody>
+			</Table>
+
+
+		</section>
+	);
+};
+
+export default CartPag
+```
+
+- CartPage.css
+
+```css
+.cart_page {
+	flex-direction: column;
+	justify-content: center;
+	width: 60%;
+	margin: 0 auto;
+	padding: 32px 48px;
+}
+
+.user_info {
+	gap: 16px;
+	margin-bottom: 32px;
+}
+
+.user_info img {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: 100%;
+}
+
+.user_name {
+	font-size: 21px;
+	font-weight: 600;
+}
+
+.cart_remove_icon {
+	width: 35px;
+	height: 35px;
+	cursor: pointer;
+}
+```
+
+- Table 컴포넌트를 따로 분리하여 다른 페이지에서도 재사용 가능하게 함.
+
+![Table](https://github.com/user-attachments/assets/c5bbfd95-627e-4eab-b783-f66f15f332c7)
+
+- Table.jsx
+
+```react
+import './Table.css';
+
+const Table = ({ headings, children }) => {
+	return (
+		<table className='common_table'>
+			<thead>
+				<tr>
+					{headings.map((item, index) => (
+						<th key={index}>{item}</th>
+					))}
+				</tr>
+			</thead>
+			{children}
+		</table>
+	);
+};
+
+export default Table;
+```
+
+- Table.css
+
+```css
+.common_table {
+    width: 100%;
+    margin-bottom: 16px;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.24);
+}
+
+.common_table thead th {
+    height: 50px;
+    background-color: #36304a;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.common_table tbody tr {
+    height: 50px;
+    text-align: center;
+}
+
+.common_table tbody tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+```
+
+![table ex](https://github.com/user-attachments/assets/74806e26-dc73-4c58-b66d-4aa39fe0560e)
+
+- 테이블 아래에 간단한 테이블과 결재하기 버튼을 넣기.
+  - CartPage의 Section 안에 Table 끝나고 아래에 단순 테이블을 넣기.
+
+```react
+	<table className='cart_bill'>
+				<tbody>
+					<tr>
+						<td>총 금액</td>
+						<td>1200,000 원</td>
+					</tr>
+					<tr>
+						<td>배송비</td>
+						<td>5,000 원</td>
+					</tr>
+					<tr className='cart_bill_final'>
+						<td>결재금액</td>
+						<td>1205,000 원</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<button className='search_button checkout_button'>결재하기</button>
+```
+
+- CartPage.css 추가.
+
+```css
+.cart_bill {
+	align-self: flex-end;
+	width: 400px;
+	border-collapse: collapse;
+	font-size: 16px;
+	margin-top: 16px;
+	background-color: #fff;
+}
+
+.cart_bill td {
+	padding: 12px 20px;
+	border: 3px solid #e5e5e5;
+}
+
+.cart_bill td:last-child {
+	text-align: end;
+	width: 250px;
+}
+
+.cart_bill_final {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.checkout_button {
+	align-self: flex-end;
+	height: 38px !important;
+	margin: 16px 0;
+	padding: 0 16px !important;
+}
+
+.table_quantity_input {
+	height: 50px;
+	justify-content: center;
+}
+```
+
+![total](https://github.com/user-attachments/assets/df677ce9-6b7a-4c29-a847-a63408a70094)
+
+<hr>
+
+# MyOrderPage
+
+- 이전에 사용한 Table 컴포넌트를 사용하여 주문페이지를 만들기.
+
+![OrderPage](https://github.com/user-attachments/assets/7565173c-e9e3-4bfc-b0f3-b2257033f775)
+
+- MyOrderPage.jsx
+
+```react
+import Table from '../Common/Table';
+
+const MyOrderPage = () => {
+	return (
+		<section className='align_center myorder_page'>
+			<Table headings={['내주문', '상품들', '결재금액', '배송상태']}>
+				<tbody>
+					<tr>
+						<td>1</td>
+						<td>iPhone, Power Bank</td>
+						<td>1205,000 원</td>
+						<td>배송중</td>
+					</tr>
+				</tbody>
+			</Table>
+		</section>
+	);
+};
+
+export default MyOrderPage;
+```
+
+- MyOrderPage.css
+
+```css
+.myorder_page {
+    justify-content: center;
+    width: 50%;
+    margin: 0 auto;
+    padding: 32px 48px;
+}
+```
+
+<hr>
+
+# LoginPage
+
+- LoginPage.jsx
+
+```react
+import './LoginPage.css';
+
+const LoginPage = () => {
+
+	return (
+		<section className='align_center form_page'>
+			<form className='authentication_form'>
+				<h2>로그인 폼</h2>
+				<div className='form_inputs'>
+					<div>
+						<label htmlFor='email'>Email</label>
+						<input
+							type='email'
+							id='email'
+							className='form_text_input'
+							placeholder='이메일 입력...'
+						/>
+					</div>
+					<div>
+						<label htmlFor='password'>Password</label>
+						<input
+							type='password'
+							id='password'
+							className='form_text_input'
+							placeholder='패스워드'
+						/>
+					</div>
+
+					<button type='submit' className='search_button form_submit'>
+						Submit
+					</button>
+				</div>
+			</form>
+		</section>
+	);
+};
+
+export default LoginPage;
+```
+
+- LoginPage.css
+
+```css
+.form_page {
+    justify-content: center;
+}
+
+.authentication_form {
+    width: 30%;
+    padding: 32px 48px;
+    margin-top: 32px;
+    background-color: #fff;
+}
+
+.authentication_form h2 {
+    font-size: 40px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.form_inputs div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.form_inputs label {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.form_text_input {
+    height: 35px;
+    padding: 0 8px;
+    font-size: 17px;
+    font-weight: 500;
+    outline: none;
+}
+
+.form_submit {
+    height: 40px;
+    width: 100%;
+    margin: 25px 0 10px;
+}
+
+.form_error {
+    color: red;
+}
+```
+
+<hr>
+
+# useRef로 특정 태그 선택
+
+![LoginPage](https://github.com/user-attachments/assets/842eb416-1546-4855-9f93-20e8e0f382aa)
+
+- JavaScript 를 사용 할 때에는, 우리가 특정 DOM 을 선택해야 하는 상황에 getElementById, querySelector 같은 DOM Selector 함수를 사용해서 DOM 을 선택.
+- 리액트를 사용하는 프로젝트에서도 가끔씩 DOM 을 직접 선택해야 하는 상황이 발생 할 때도 있음.
+  - 그럴 땐, 리액트에서 ref 라는 것을 사용.
+- 함수형 컴포넌트에서 ref 를 사용 할 때에는 useRef 라는 Hook 함수를 사용.
+
+- **로그인페이지에서 useRef 사용**
+
+```react
+const LoginPage = () => {
+	const passwordRef = useRef(null);
+```
+
+- 입력 패스워드 태그에 ref를 추가하고 아래에 버튼 2개를 추가
+
+```react
+<input
+							type='password'
+							ref={passwordRef}
+							id='password'
+							className='form_text_input'
+							placeholder='패스워드 입력...'
+						/>
+						<button type='button' onClick={() => console.log(passwordRef.current)}>
+							비밀번호 숨기기
+						</button>
+						<button type='button' onClick={() => (passwordRef.current.type = 'text')}>
+			비밀번호 보이게
+		</button>
+```
+
+```react
+	
+```
+
+
+![password](https://github.com/user-attachments/assets/a086ef86-3842-403f-a307-cb0454abed4e)
+
+<hr>
 
