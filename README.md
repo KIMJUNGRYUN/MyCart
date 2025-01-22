@@ -2083,3 +2083,276 @@ import apiClient from '../utils/api-client';
 
 # ProductCard에 동적 데이터 전달
 
+![ProductCard](https://github.com/user-attachments/assets/318ce6d9-bc10-4ea0-967a-f563882ae227)
+
+```react
+const ProductCard = ({ id, image, price, title, rating, ratingCounts, stock }) => {
+```
+
+- 제품 id와 제품 이미지
+
+```react
+<NavLink href={`product/${id}`}>
+	<img src={image} alt='product image' />
+</NavLink>
+```
+
+- 가격과 타이틀, 가격은 없으면 에러가 나므로 ?로 있을경우에만 원화로 변환함.
+
+```react
+	<img src={star} alt='star' /> {rating}
+</p>
+<p className='product_review_count'>{ratingCounts}</p>
+```
+
+- stock 수량이 1개 이상 있을 경우에만 장바구니 담기 아이콘을 보여줌.
+
+```react
+{stock > 0 && (
+	<button className='add_to_cart'>
+		<img src={basket} alt='basket button' />
+	</button>
+)}
+```
+
+- ProductList에서 props 전달.
+
+```react
+<div className='products_list'>
+				{error && <em className='form_error'>{error}</em>}
+				{products.map((product) => (
+					<ProductCard
+						key={product._id}
+						id={product._id}
+						image={product.images[0]}
+						price={product.price}
+						rating={product.rating}
+						ratingCounts={product.reviews.counts}
+						stock={product.stock}
+					/>
+				))}
+			</div>
+```
+
+![ProductServer](https://github.com/user-attachments/assets/6fb74baf-df0d-4416-b6ab-cb9b1d1ee396)
+
+- 이미지가 나오지 않음.  벡엔드 서버 아래의 주소로 요청하기.
+
+```react
+<img src={`http://localhost:5000/products/${image}`}
+```
+
+![ProductServerImage](https://github.com/user-attachments/assets/2ca69dd7-731e-4699-9a0b-3707d8edb312)
+
+<hr>
+
+# 카테고리 데이터
+
+`ProductSidebar`
+
+- products 가져오는것과 같이 categories를 가져온다.
+
+```react
+const ProductsSidebar = () => {
+	const [categories, setCategories] = useState([]);
+	const [error, setError] = useState('');
+
+	useEffect(() => {
+		apiClient
+			.get('/category')
+			.then((res) => setCategories(res.data))
+			.catch((err) => setError(err.message));
+	}, []);
+```
+
+
+- error가 있을경우 에러표시 카테고리 데이터들을 map을 서서 반복
+
+```react
+				{error && <em className='form_error'>{error}</em>}
+				{categories.map((category) => (
+					<LinkWithIcon
+						key={category._id}
+						title={category.name}
+						link={`/products?category=${category.name}`}
+						emoji={`http://localhost:5000/category/${category.image}`}
+						sidebar={true}
+					/>
+				))}
+```
+
+![Category](https://github.com/user-attachments/assets/e109f3b9-a183-45ee-ad5c-016d229b8c25)
+
+# 커스텀 Hook 만들어 ProductSidebar에 적용
+
+- 반복되는 useState와 useEffect 등의 패턴을 커스텀 Hook을 만들어 사용.
+
+![Hooks](https://github.com/user-attachments/assets/bdc2f9b9-1724-4d65-817c-120ed0554a02)
+
+- useData.js  커스텀 훅은 순수 JS이기 때문에 jsx가 아닌 js.
+
+```react
+import { useEffect, useState } from 'react';
+import apiClient from '../utils/api-client';
+
+const useData = (url) => {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    apiClient
+      .get(url)
+      .then((res) => setData(res.data))
+      .catch((err) => setError(err.message));
+  }, []);
+
+  return { data, error };
+};
+
+export default useData;
+```
+
+ - 커스텀 훅을 사용해서 ProductSidebar.jsx 수정
+
+```react
+const ProductsSidebar = () => {
+	const { data: categories, error } = useData('category');
+```
+
+- categories 데이터가 있을경우에만 map 메소드를 실행하게  categories &&를 붙인다. 만약 데이터가 없을시 에러발생.
+
+```react
+	{error && <em className='form_error'>{error}</em>}
+				{categories &&
+					categories.map((category) => (
+						<LinkWithIcon
+							key={category._id}
+							title={category.name}
+							link={`/products?category=${category.name}`}
+							emoji={`http://localhost:5000/category/${category.image}`}
+							sidebar={true}
+						/>
+					))}
+```
+
+<hr>
+
+# ProductsList 에도 적용.
+
+- useData('/products'); 요청시 data는 아래처럼 아직 products 만 분리가 되지 않았기 때문에 data.products 데이터만 가져온다.
+
+![ProductList](https://github.com/user-attachments/assets/78b75fec-5d49-4fd9-b4f3-2dd487821c63)
+
+
+```react
+const ProductsList = () => {
+	const { data, error } =  useData('/products');
+```
+
+- 아래에 data.products로 가져온다.
+
+```react
+	<div className='products_list'>
+				{error && <em className='form_error'>{error}</em>}
+				{data.products &&
+					data.products.map((product) => (
+						<ProductCard
+							key={product._id}
+							id={product._id}
+							image={product.images[0]}
+							price={product.price}
+							title={product.title}
+							rating={product.rating}
+							ratingCounts={product.reviews.counts}
+							stock={product.stock}
+						/>
+					))}
+			</div>
+```
+
+<hr>
+
+# 리액트 Loading Skeleton 적용
+
+[react-loading-skeleton](https://www.npmjs.com/package/react-loading-skeleton)
+
+
+![skeleton](https://github.com/user-attachments/assets/990c6a9f-ac3b-4572-a371-cb582d68724e)
+
+- ProductCardSkeleton.jsx
+
+```react
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
+const ProductCardSkeleton = () => {
+	return <Skeleton className='product_card' width='275px' />;
+};
+
+export default ProductCardSkeleton;
+```
+
+- 스켈레톤은 product_card와 같은 크기로 적용 ProductList 에 products.map 반복하기전에 넣기.
+
+```react
+{error && <em className='form_error'>{error}</em>}
+				<ProductCardSkeleton />
+				{data.products &&
+					data.products.map((product) => (
+```
+
+![react-sk](https://github.com/user-attachments/assets/5161846b-fc24-443e-9517-3952c84655c5)
+
+```react
+	const skeletons = [1, 2, 3, 4, 5, 6, 7, 8];
+				{skeletons.map((n) => (
+					<ProductCardSkeleton key={n} />
+				))}
+```
+
+![ske](https://github.com/user-attachments/assets/6d5691a7-533b-4bc5-84cc-d16b0bcb4894)
+
+- 커스텀 훅 useData.js 수정.
+
+```react
+const [isLoading, setIsLoading] = useState(false);
+```
+
+- axios로 데이터를 가져오기전에 로딩을 true로 업데이트.
+
+```react
+  useEffect(() => {
+    setIsLoading(true);
+    apiClient
+      .get(url)
+      .then((res) => { setData(res.data); setIsLoading(false); })
+      .catch((err) => { setError(err.message); setIsLoading(false); });
+  }, []);
+```
+
+- 데이터를 잘가져왔을때 false로 업데이트
+- 에러나서 못가져왔을때도 false로 업데이트
+
+
+```react
+return { data, error, isLoading };
+```
+
+- 마지막으로 isLoading 을 리턴추가.
+
+- ProductsList 에서 Hook가져올때 isLoading도 추가.
+
+
+```react
+const { data, error, isLoading } = useData('/products');
+```
+
+- 스켈레톤은 isLoading이 true 일때 (벡엔드에 데이터 요청주일때만) 보여준다.
+
+```react
+{isLoading && skeletons.map((n) => <ProductCardSkeleton key={n} />)}
+```
+
+<hr>
+
+
