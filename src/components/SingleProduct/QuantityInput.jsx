@@ -1,18 +1,36 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './QuantityInput.css';
 
-const QuantityInput = () => {
+const QuantityInput = ({quantity, setQuantity, stock }) => {
+
+
   return(
     <>
-        <button className='quantity_input_button' disabled>  
-                                        {/* disabled 비활성화 */}
+        <button
+				onClick={() => setQuantity((prev) => prev -1)}
+				className='quantity_input_button'
+				disabled={quantity <= 1}
+			>
+                                       
             {" "}
             -{" "}
         </button>
-        <p className='quantity_input_count'>1</p>
-        <button className='quantity_input_button'>+</button>
-    </>
-  )
-}
+        <p className='quantity_input_count'>{quantity}</p>
 
-export default QuantityInput
+        <button
+				onClick={() => setQuantity((prev) => prev + 1)}
+				className='quantity_input_button'
+        disabled={quantity >= stock}
+      >
+            {" "}
+            +{" "}
+        </button>
+    </>
+  );
+};
+
+export default QuantityInput;
+
+
+
+
