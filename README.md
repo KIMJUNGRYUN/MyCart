@@ -1489,3 +1489,597 @@ const LoginPage = () => {
 
 <hr>
 
+# useState로 Form 사용하기
+
+```react
+const LoginPage = () => {
+
+	const [user, setUser] = useState({
+		email: '',
+		password: '',
+	});
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		console.log(user);
+	};
+```
+
+- eamil과 password 입력에 추가.
+
+```react
+onChange={(e) => setUser({ ...user, email: e.target.value })}
+
+onChange={(e) => setUser({ ...user, password: e.target.value })}
+```
+
+![LoginForm](https://github.com/user-attachments/assets/d0671b4e-bf44-4d25-99cd-03ae47735eef)
+
+- Submit 버튼 클릭후 이메일, 패스워드 데이터 초기화
+
+```react
+setUser({ email: '', password: '' });
+```
+
+- user 데이터가 바뀌면 입력들의 value 값이 바뀌고 폼 초기화
+
+ ```![LoginForm1](https://github.com/user-attachments/assets/7ddb4dc7-488c-42ae-99ac-949391b60a39)
+
+```react
+value={user.setUser}
+```
+
+<hr>
+
+# React Hook Form 사용
+[react-hook-form](https://www.npmjs.com/package/react-hook-form)
+
+```react
+npm i react-hook-form
+```
+
+- Quicstart 문서를 보면 우선 useForm()을 만들기
+
+```react
+const { register, handleSubmit } = useForm();
+```
+
+- register는 각각의 input에 적용
+
+```react
+{...register('email')}
+{...register('password')}
+```
+
+- handleSubmit은 form의 onSubmit에 적용
+
+```react
+onSubmit={handleSubmit((formData) => console.log(formData))}
+```
+
+- 이전의 useState와 같게 동작.
+  - handleSubmit의 안에 화살표 함수는 더 많은 코드를 적을수도 있으므로 따로 빼어서 아래처럼 수정.
+
+```react
+const submitData = (formData) => console.log(formData);
+```
+
+```react
+onSubmit={handleSubmit(submitData)}
+```
+
+- 이렇게 useform의 register(입력등록), handleSubmit(onSubmit액션)을 쉽게 사용.
+
+<hr>
+
+# Form Validation 폼 유효성 검증
+
+[Form Validation](https://www.react-hook-form.com/get-started/#Handleerrors)
+
+- formState: { errors } 를 추가
+
+  ```react
+  	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm();
+  ```
+
+  - input에 검증이 필요한 속성을 입력
+    - required
+    - min (최소값)
+    - max (최대값)
+    - minLength (최소길이)
+     -maxLength
+    - pattern
+    - validate
+
+
+- 이메일 input에 추가
+
+```react
+{...register('email', { required: '이메일을 이력해주세요.' })}
+```
+
+- 이메일 input 태그 아래 추가
+
+```react
+{errors.email && <em className='form_error'>{errors.email.message}</em>}
+```
+
+- 비밀번호 input에 추가
+
+```react
+{...register('password', {
+		required: '패스워드를 입력해주세요.',
+		minLength: { value: 4, message: '패스워드는 최소 4자 이상.' },
+	})}
+```
+
+- input 태그 아래에 추가
+
+```react
+{errors.password && <em className='form_error'>{errors.password.message}</em>}
+```
+
+![LoginForm3](https://github.com/user-attachments/assets/22d89e25-31cf-4498-8bfc-dff31bdec3ca)
+
+<hr>
+
+# 회원가입 Signup 페이지
+
+![Signupjsx](https://github.com/user-attachments/assets/aa467cb3-7b4d-4b0b-a564-b4dc0a6f9c17)
+
+
+```react
+import { useForm } from 'react-hook-form';
+
+import './SignupPage.css';
+import user from '../../assets/user.webp';
+
+const SignupPage = () => {
+	// const [profilePic, setProfilePic] = useState(null);
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		watch,
+	} = useForm();
+
+	const submitData = (formData) => console.log(formData);
+
+	//console.log(profilePic);
+
+	return (
+		<section className='align_center form_page'>
+			<form className='authentication_form signup_form' onSubmit={handleSubmit(submitData)}>
+				<h2>회원가입 폼</h2>
+
+				<div className='image_input_section'>
+					<div className='image_preview'>
+						<img src={user} id='file-ip-1-preview' />
+					</div>
+					<label htmlFor='file-ip-1' className='image_label'>
+						이미지 업로드
+					</label>
+					<input
+						type='file'
+						id='file-ip-1'
+						className='image_input'
+					/>
+				</div>
+
+				{/* Form Inputs */}
+				<div className='form_inputs signup_form_input'>
+					<div>
+						<label htmlFor='name'>Name</label>
+						<input
+							id='name'
+							className='form_text_input'
+							type='text'
+							placeholder='이름 입력...'
+							{...register('name', {
+								required: '이름을 입력해주세요.',
+								minLength: { value: 2, message: '이름은 최소 2자 이상' },
+								maxLength: { value: 10, message: '이름은 최대 10자 이하' },
+							})}
+						/>
+						{errors.name && <em className='form_error'>{errors.name.message}</em>}
+					</div>
+
+					<div>
+						<label htmlFor='email'>Email</label>
+						<input
+							id='email'
+							className='form_text_input'
+							type='email'
+							placeholder='이메일 입력...'
+							{...register('email', {
+								required: '이메일을 입력해주세요.',
+								pattern: {
+									value: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+									message: '올바른 이메일 주소를 입력하세요.',
+								},
+							})}
+						/>
+						{errors.email && <em className='form_error'>{errors.email.message}</em>}
+					</div>
+
+					<div>
+						<label htmlFor='password'>Password</label>
+						<input
+							id='password'
+							className='form_text_input'
+							type='password'
+							placeholder='패스워드 입력...'
+							{...register('password', {
+								required: '패스워드를 입력해주세요.',
+								minLength: { value: 4, message: '패스워드는 최소 4자 이상.' },
+							})}
+						/>
+						{errors.password && <em className='form_error'>{errors.password.message}</em>}
+					</div>
+
+					<div>
+						<label htmlFor='cpassword'>Confirm Password</label>
+						<input
+							id='cpassword'
+							className='form_text_input'
+							type='password'
+							placeholder='패스워드 확인 입력...'
+							{...register('confirmPassword', {
+								required: true,
+								validate: (value) => {
+									if (watch('password') != value) {
+										return '패스워드가 맞지 않습니다.';
+									}
+								},
+							})}
+						/>
+						{errors.confirmPassword && (
+							<em className='form_error'>{errors.confirmPassword.message}</em>
+						)}
+					</div>
+
+					<div className='signup_textares_section'>
+						<label htmlFor='address'>Delivery Address</label>
+						<textarea
+							id='address'
+							className='input_textarea'
+							placeholder='배송주소 입력...'
+							{...register('deliveryAddress', {
+								required: '배송주소를 입력해주세요.',
+								minLength: { value: 10, message: '배송주소는 최소 10자 이상.' },
+							})}
+						/>
+						{errors.deliveryAddress && (
+							<em className='form_error'>{errors.deliveryAddress.message}</em>
+						)}
+					</div>
+				</div>
+
+				<button className='search_button form_submit' type='submit'>
+					Submit
+				</button>
+			</form>
+		</section>
+	);
+};
+
+export default SignupPage;
+```
+
+- css
+
+```css 
+.signup_form {
+    width: 40%;
+}
+
+.image_input_section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image_preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 100%;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.image_preview img {
+    width: 100%;
+    height: 100%;
+}
+
+.image_input {
+    display: none;
+}
+
+.image_label {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    background: #6457f9;
+    color: #fff;
+    font-size: 15px;
+    font-family: inherit;
+    text-transform: Uppercase;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.signup_form_input {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.signup_textares_section {
+    grid-column: 1/3;
+}
+
+.input_textarea {
+    font-size: 17px;
+    font-weight: 500;
+    font-family: inherit;
+    height: 120px;
+    resize: none;
+    padding: 4px 8px;
+    outline: none;
+}
+```
+
+<hr>
+
+# 이미지 업로드
+
+- SignupPage에 프로파일 이미지 스테이트 만들기.
+
+```react
+const [profilePic, setProfilePic] = useState(null);
+```
+
+```react
+console.log(profilePic);
+```
+
+- 파일 업로드 input에서 이미지를 올리면 첫번째 이미지로 업데이트.
+
+```react
+onChange={(e) => setProfilePic(e.target.files[0])}
+```
+
+- 파일을 프리뷰 하기 위해 URL.createObjectURL(파일)을 사용.
+
+
+```react
+<img src={profilePic ? URL.createObjectURL(profilePic) : user}
+```
+
+[URL:createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static)
+
+![SignUp](https://github.com/user-attachments/assets/762aa7e9-fa1c-4c99-b7ea-85bc801e10bb)
+
+
+<hr>
+
+# MongoDB 설치, MongoShell 설치, path 설정
+
+- Mongo DB Community에서 다운로드.
+
+![mongo](https://github.com/user-attachments/assets/7ff3e127-20a3-4c22-8550-efc40acddeeb)
+
+
+- Mongo Shell 설치.
+
+![MongoShell](https://github.com/user-attachments/assets/b1a6d48d-a0d1-4e3c-b16f-d51ca1a9495f)
+
+-  mongosh.exe를 복사 => mongo.db가 설치된 폴더의 bin에 붙여넣기
+ - 마지막 환경변수 설정 C:\Program Files\MongoDB\Server\7.0\bin 현재 폴더까지의 주소를 복사
+
+- 시스템 환경변수 편집에 붙여넣기.
+![path](https://github.com/user-attachments/assets/1e528651-0f84-45a7-9b50-5770a1a4ccb5)
+
+- 터미널에서 mongosh 확인하기.
+![mongo cmd](https://github.com/user-attachments/assets/a571ad8b-5642-4495-a853-206adef18b35)
+
+<hr>
+
+# BackEnd 실행
+
+- 임시 db로 공부하기
+![mon](https://github.com/user-attachments/assets/b5d924a2-d000-4af1-899e-fe2d4598c3ed)
+
+- 노드모듈 설치.
+
+```react
+npm install
+```
+
+- 몽고DB에 myCart 데이터베이스에 카테고리와 프로덕트 데이터 저장.
+
+```react
+ node products.js
+```
+
+![Mongo Cate](https://github.com/user-attachments/assets/aebefde6-3047-4df0-a45c-3b5a53284ab8)
+
+- BackEnd 서버 실행하기.
+
+```react
+$ node index.js
+Server is running on PORT: 5000
+DB Connected...
+```
+
+- 포트번호 5000으로 실행됨.
+  - 아래주소로 벡엔드 서버가 정상적으로 동작하여 카테고리 데이터를 보내는지확인.
+
+```react
+http://localhost:5000/api/category
+```
+
+![api](https://github.com/user-attachments/assets/56ce863c-e02d-443c-a0e6-3fd1139c76ce)
+
+
+<hr>
+
+# React Router 적용
+
+- 리액트 라우터 설치하기
+
+```react
+$ npm i react-router-dom
+```
+
+- main.jsx 에 브라우저라우터로 앱을 감싸서 라우터를 사용 가능하게 설정
+
+```react
+<BrowserRouter>
+			<App />
+		</BrowserRouter>
+```
+
+- 라우팅 폴더를 컴포넌츠에 추가.
+
+
+![Routing Components](https://github.com/user-attachments/assets/1d6864e7-2c7e-4ea4-b6b9-2d3d0e9cf70f)
+
+```react
+import { Route, Routes } from 'react-router-dom';
+
+import HomePage from '../Home/HomePage';
+import ProductsPage from '../Products/ProductsPage';
+import SingleProductPage from '../SingleProduct/SingleProductPage';
+import CartPage from '../Cart/CartPage';
+import MyOrderPage from '../MyOrder/MyOrderPage';
+import LoginPage from '../Authentication/LoginPage';
+import SignupPage from '../Authentication/SignupPage';
+
+const Routing = () => {
+	return (
+		<Routes>
+			<Route path='/' element={<HomePage />} />
+			<Route path='/products' element={<ProductsPage />} />
+			<Route path='/product/:id' element={<SingleProductPage />} />
+			<Route path='/signup' element={<SignupPage />} />
+			<Route path='/login' element={<LoginPage />} />
+			<Route path='/cart' element={<CartPage />} />
+			<Route path='/myorders' element={<MyOrderPage />} />
+		</Routes>
+	);
+};
+
+export default Routing;
+```
+
+- App.jsx
+
+```react
+const App = () => {
+	return (
+		<div className='app'>
+			<Navbar />
+			<main>
+				<Routing />
+			</main>
+		</div>
+	);
+};
+```
+
+<hr>
+
+# NavLink 메뉴 클릭시 기본 active 클래스로 CSS
+
+- 메뉴중 장바구니 a 태그를 NavLink로 바꾼다  href => to로 바꿔야 함.
+
+```react
+<NavLink to='/cart' className='align_center'>
+	장바구니 <p className='align_center cart_counts'>0</p>
+</NavLink>
+```
+
+- 마찬가지로 LinkWithIcon에 가서 a 태그를 NavLink로 바꾼다.
+ - Navbar.css 에 CSS 추가.
+
+```css
+.navbar_links > a.active {
+	font-weight: 600;
+}
+```
+
+<hr>
+
+# Axios 설치 및 products 데이터 가져오기
+
+- Axios 라이브러리 설치.
+
+```react
+$ npm i axios
+```
+
+- src 아래에 utils 폴더 생성. 
+
+![utils](https://github.com/user-attachments/assets/f3ef9d42-1d83-4090-bc32-eec3238ab4b7)
+
+- utils 폴더에 api-client.js 파일생성.
+
+![api-Client](https://github.com/user-attachments/assets/7702c725-1988-46b8-90dd-07a1ea3670b9)
+
+- 서버의 api 기본주소를 설정.
+
+```react
+import axios from "axios";
+
+export default axios.create({
+  baseURL: "http://localhost:5000/api"
+});
+```
+
+- ProductList.jsx
+
+```react
+import apiClient from '../utils/api-client';
+...
+
+ const ProductsList = () => {
+	const [products, setProducts] = useState([]);
+	const [error, setError] = useState('');
+
+	useEffect(() => {
+		apiClient
+			.get('/products')
+			.then((res) => setProducts(res.data.products))
+			.catch((err) => setError(err));
+	}, []);
+```
+
+- 리액트 developer tool로  Components를 보면 ProductList 에 아래처럼 데이터를 가져옴.
+
+![hook](https://github.com/user-attachments/assets/471e340b-803b-4bca-9c35-77d51656daca)
+
+```react
+	<div className='products_list'>
+				{error && <em className='form_error'>{error}</em>}
+				{products.map((product) => (
+					<ProductCard key={product._id} />
+				))}
+			</div>
+```
+
+![pro](https://github.com/user-attachments/assets/9958ab76-1d97-410c-ae0a-645b85a42a8c)
+
+<hr>
+
+# ProductCard에 동적 데이터 전달
+
