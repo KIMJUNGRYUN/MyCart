@@ -5,7 +5,7 @@ import ProductCardSkeleton from './ProductCardSkeleton';
 
 
 const ProductsList = () => {
-	const { data, error } = useData("products");
+	const { data, error, isLoading } = useData("products");
 	const skeleton = [1,2,3,4,5,6,7,8];
 	console.log(data);
 
@@ -24,7 +24,8 @@ const ProductsList = () => {
 
 			<div className='products_list'>
 				{error && <em className='form_error'>{error}</em>}
-				{skeleton.map((n) => {
+				{isLoading && 
+				  skeleton.map((n) => {
 					<ProductCardSkeleton key={n} />
 				})}
 				
