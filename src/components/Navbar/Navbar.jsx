@@ -13,7 +13,9 @@ const Navbar = () => {
   return (
     <nav className='align_center navbar'>
     <div className='align_center'>
-        <h1 className='navbar_heading'>myCart</h1>
+        <h1 className='navbar_heading'>
+        <LinkWithIcon title='MyCart' link='/' emoji={rocket} />
+        </h1>
         <form className='align_center navbar_form'>
             <input type='text' className='navbar_search' placeholder='제품 찾기...' />
             <button type='submit' className='search_button'>
