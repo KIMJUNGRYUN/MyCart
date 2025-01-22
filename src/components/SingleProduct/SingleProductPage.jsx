@@ -3,6 +3,7 @@ import './SingleProductPage.css';
 import QuantityInput from './QuantityInput';
 import { useParams } from 'react-router-dom';
 import useData from '../../Hook/useData';
+import Loader from '../Common/Loader';
 
 //서버에서 가져오는 제품 데이터 객체 (임시)
 // const product = {
@@ -29,6 +30,7 @@ const SingleProductPage = () => {
   return (
     <section className='align_center single_product'>
        {err && <em className='form_error'>{err}</em>}
+       {isLoading && <Loader />}
         {product._id && (
             <>
             <div className='align_center'>
