@@ -36,7 +36,7 @@ const Navbar = ({user, cartCount}) => {
         <>
           <LinkWithIcon title='홈페이지' link='/' emoji={rocket} />
           <LinkWithIcon title='상품들' link='/products' emoji={star} />
-          <LinkWithIcon title='내 주문' link='/myorders' emoji={order} />
+          <LinkWithIcon title='주문보기' link='/myorders' emoji={order} />
           <LinkWithIcon title='로그아웃' link='/logout' emoji={lock} />
           <NavLink to='/cart' className='align_center'>
               장바구니 <p className='align_center cart_counts'>{cartCount}</p>
