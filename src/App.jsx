@@ -7,7 +7,8 @@ import { jwtDecode } from 'jwt-decode';
 
 const App = () => {
   const [user, setUser] = useState(null);
-
+  const [cart, setCart] = useState([]);
+  
   useEffect(() => {
     
     try{
@@ -20,14 +21,14 @@ const App = () => {
       }else{
         setUser(jwtUser);
       }
-      
+
     }catch(error){}  //token이 없을 경우는 그냥 go
   }, []);  
  
   return (
     
     <div className='app'>
-        <Navbar user={user}/>
+        <Navbar user={user} cartCount={cart.length}/>
       <main>
         <Routing />
       </main>

@@ -9,7 +9,7 @@ import lock from '../../assets/locked.png';
 import LinkWithIcon from './LinkWithIcon';
 import { NavLink } from 'react-router-dom';
 
-const Navbar = ({user}) => {
+const Navbar = ({user, cartCount}) => {
   return (
     <nav className='align_center navbar'>
     <div className='align_center'>
@@ -25,25 +25,25 @@ const Navbar = ({user}) => {
     </div>
     
     <div className='align_center navbar_links'>
-
       {!user && (
         <>
           <LinkWithIcon title='로그인' link='/login' emoji={idButton} />
-          <LinkWithIcon title='가입' link='/signup' emoji={memo} />
+          <LinkWithIcon title='회원가입' link='/signup' emoji={memo} />
+
         </>
       )}
-      
-      {user && (
+      {user && (   
         <>
-          <LinkWithIcon title='내주문' link='/myorders' emoji={order} />
+          <LinkWithIcon title='홈페이지' link='/' emoji={rocket} />
+          <LinkWithIcon title='상품들' link='/products' emoji={star} />
+          <LinkWithIcon title='내 주문' link='/myorders' emoji={order} />
           <LinkWithIcon title='로그아웃' link='/logout' emoji={lock} />
           <NavLink to='/cart' className='align_center'>
-            장바구니 <p className='align_center cart_counts'>0</p>
+              장바구니 <p className='align_center cart_counts'>{cartCount}</p>
           </NavLink>
         </>
       )}
 
-      
     
 			</div>
     <div className='align_center navbar_links'>
