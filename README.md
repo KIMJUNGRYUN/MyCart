@@ -2755,4 +2755,192 @@ export default Loader;
 			{product._id && (
 ```
 
+<hr>
+
+# SingleProductPage 구매개수 증가 감소 버튼
+
+- SingProductPage
+
+```react
+const [quantity, setQuantity ] = useState(1);
+```
+
+```react
+<QuantityInput quantity={quantity} setQuantity={setQuantity} stock={product.stock} />
+```
+
+- QuantityInput
+
+```react
+			<button
+				onClick={() => setQuantity((prev) => prev-1)}
+				className='quantity_input_button'
+				disabled={quantity <= 1}
+			>
+            <p className='quantity_input_count'>{quantity}</p>
+			<button
+				onClick={() => setQuantity((prev) => prev+1)}
+				className='quantity_input_button'
+				disabled={quantity >= stock}
+			>
+​
+```
+
+<hr>
+
+# PostMan으로 signup 가입하기 테스트
+
+![postman signup](https://github.com/user-attachments/assets/c796f611-ca54-4f46-9550-b5df9667fab7)
+
+![postman token](https://github.com/user-attachments/assets/316721fb-01f9-4c3f-baad-8f42b8429fdf)
+
+```react
+http://localhost:5000/api/user/signup
+```
+
+```react
+{
+    "name": "Dooly",
+    "email": "dooly@naver.com",
+    "password": "12345678",
+    "deliveryAddress": "부산광역시 부산진구"
+}
+```
+
+- DB에 users 테이블 추가됨.
+
+![mongo users](https://github.com/user-attachments/assets/92026286-8e1d-4f31-b500-6e7acc39ccbd)
+
+
+
+- 정상적으로 가입시 JWT (제이슨 웹 토큰)이 생성됨.
+
+- 이번에는 form-data를 선택해서 이미지도 같이 넣어서 보내기.
+
+![postman img](https://github.com/user-attachments/assets/9a2f800d-69e6-484a-8f44-8e8ac5d8bfcf)
+
+![postman object](https://github.com/user-attachments/assets/de6cde99-46fd-4f05-ae23-22ba7de1144d)
+
+<hr>
+
+# userServices.js의 signup 함수로 Signup 페이지 가입하기
+
+![userService](https://github.com/user-attachments/assets/f809969a-2206-4414-b32c-a7fcc4b7864e)
+
+- userServices.js
+
+```react
+import apiClient from '../utils/api-client';
+
+export async function signup(user, profile) {
+  const body = new FormData();
+  body.append("name", user.name);
+  body.append("email", user.email);
+  body.append("password", user.password);
+  body.append("deliveryAddress", user.deliveryAddress);
+  body.append("profilePic", profile);
+
+  await apiClient.post('/user/signup', body);
+}
+```
+
+- SignupPage 에서 submitData 함수를 수정.
+  - async await를 써서 벡엔드에서 가입이 끝날때까지 대기함.
+ 
+```react
+	const submitData = async (formData) => {
+		await signup(formData, profilePic);
+	};
+```
+
+- 실제로 동작하는지 회원가입 폼에가서
+
+- 패스워드는 8자 이상으로 수정. 
+  - submit 클릭시 화면은 똑같지만 오른쪽 네트워크에 보면 signup 요청으로 토큰이 응답된것을 알 수 있음.
+
+
+![kakaotalk](https://github.com/user-attachments/assets/915655a4-b89d-4765-95e3-1e7fa42c3231)
+  
+![jeju](https://github.com/user-attachments/assets/95205163-c71e-46b4-9bd1-1d38fafb5630)
+
+- 똑같은 이메일로 가입시 에러메세지가 돌아옴.
+
+![error](https://github.com/user-attachments/assets/3cb3c5ab-e9ee-4157-b2b0-4a064bc6ea75)
+
+<hr>
+
+# Signup 에러 처리
+
+```react
+const submitData = async (formData) => {
+		try {
+			await signup(formData, profilePic);
+		} catch (err) {
+			console.log(err.response.data.message);
+		}
+	};
+```
+
+- 에러메세지를 스테이트로 만들기.
+
+```react
+	const [formError, setFormError] = useState('');
+```
+
+- 콘솔로그 대신에 에러메세지를 업데이트.
+
+```react
+setFormError(err.response.data.message);
+```
+
+- 폼화면의 submit 버튼 위체 에러메세지 출력.
+
+```react
+{formError && <em className='form_error'>{formError}</em>}
+```
+
+![register](https://github.com/user-attachments/assets/c1f1cace-2ff5-4ef6-83f2-de3195591f55)
+
+<hr>
+
+# Login Page PostMan 테스트
+
+- 포스트맨 테스트
+
+![login post](https://github.com/user-attachments/assets/42e08c0d-f557-4069-9411-42066d751601)
+
+<hr>
+
+# Login 하기 및 에러 처리
+
+- 1.로그인 함수 작성
+
+```react
+export async function login(user) {
+  await apiClient.post('/user/?', user);
+}
+​
+```
+
+- 2.로그인 페이지에서 로그인하고 에러 발생시 스테이트 업데이트
+
+```react
+const [formError, setFormError] = useState('');
+...
+
+	const submitData = async (formData) => {
+		try {
+			await login(formData);
+		} catch (err) {
+			setFormError(err.response.data.message);
+		}
+	};
+​```
+
+- 3.에러 메시지 폼 아래 버튼위에 에러 메시지 추가.
+
+```react
+formError && <em className='form_error'>{formError}</em>}
+```
+
 
