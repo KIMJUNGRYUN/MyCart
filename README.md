@@ -2944,3 +2944,224 @@ formError && <em className='form_error'>{formError}</em>}
 ```
 
 
+# JWT 토큰 발급과 useServices에서 로컬스토리지에 토큰 저장하고 홈페이지로 가기
+
+[JWT.IO](https://jwt.io/)
+
+- 로그인을 하거나 가입시 서버에서 JWT 토큰을 발급해 주는데 이 토큰을 복사해 Encoded에 넣어보면 암호화된 토큰을 오른쪽처럼 decode 풀어서 보여준다.
+  - 즉 name, email. 등의 유저의 정보가 담겨있고 3번째 아래쪽 시그니처는 암호화되어 있어 벡엔드에서 만든 암호화코드가 있어야 확인 가능하다.
+
+  - 로그인/가입시 서버에서는 클라이언트에게 JWT 토큰을 발행해주고 클라이언트는 이 토큰을 서버로 요청시 같이 첨부하여 인증된 유저임을 서버가 알게해서 로그인 상태를 유지한다. 서버에서는 이 토큰만 검사하면 되므로 DB를 다시 검색해 유저인지 확인할 필요가 없다.
+
+![jwt](https://github.com/user-attachments/assets/c20077cb-18ba-4dcf-b70e-d9d4d7af8248)
+
+- useServices.js
+
+```
+ const { data } = await apiClient.post('/user/signup', body);
+  localStorage.setItem("token", data.token);
+}
+
+export async function login(user) {
+  const { data } = await apiClient.post("/user/login", user);
+  localStorage.setItem("token", data.token);
+}
+```
+
+- 로그인하면 로컬스토리지에 토큰이 저장됨.
+
+![token](https://github.com/user-attachments/assets/b151cf60-6e3d-49ac-a3b0-c7f7dc31229d)
+
+- 로그인페이지에서 로그인 되면 홈페이지 이동.
+
+```react
+window.location = '/';
+```
+
+- Signup도 수정하기.
+
+```react
+onst submitData = async (formData) => {
+		try{
+			await signup(formData, profilePic);
+			window.location = '/';
+		}catch(error){
+			setFormError(error.response.data.message);
+		}
+    };
+```
+
+<hr>
+
+# App에서 토큰 정보로 유저 관리하기 && 네브바 메뉴를 로그인 상태에 따라서 다르게 보여주기
+
+- 로그인/가입시 서버에서 만들어준 토큰을 로컬스토리지에 저장.
+  - App에서 토큰을 가져와 유저정보를 useState로 업데이트
+
+```react
+const [user, setUser] = useState(null);
+```
+
+- 시작시 jst 토큰을 가져옴
+
+```react
+useEffect(()=>{
+		const jwt = localStorage.getItem("token")
+	},[])
+```
+
+- 토큰은 암호화 되어있기 때문에 암호를 풀수있는 라이브러리 설치.
+
+```react
+npm i jwt-decode
+```
+
+```react
+import jwtDecode from 'jwt-decode';
+...
+
+	useEffect(() => {
+		const jwt = localStorage.getItem('token');
+		const jwtUser = jwtDecode(jwt);
+		console.log(jwtUser);
+	}, []);
+```
+
+![object](https://github.com/user-attachments/assets/08c977f9-31d6-4129-b8ae-76b010f66626)
+
+- 토큰이 없으면 Try Catch로 에러를 처리.
+
+```react
+	try {
+			const jwt = localStorage.getItem('token');
+			const jwtUser = jwtDecode(jwt);
+			setUser(jwtUser);
+		} catch (error) {}
+```
+
+- 시큐리티 문제로 jwt 토큰의 유효가능 시간이 설정되어 있다고 한다.
+  - 여기서는 1시간인데 실제 서비스에서는 더 짧게 잡을 수 있다.
+  - 유효기간이 지난 토큰의 정보는 삭제.
+
+```react
+if (Date.now() >= jwtUser.exp * 1000) {
+				localStorage.removeItem('token');
+				location.reload();
+			} else {
+				setUser(jwtUser);
+			}
+```
+
+- Date.now()는 밀리세컨드 ms 이고 jwtUser.exp는 초단위 이므로 *1000을 한다.
+
+
+- 유저 정보를 App에서 Navbar로 전달
+
+```react
+<Navbar user={user] />
+```
+
+- 유저정보가 있을경우에만 주문,로그아웃,장바구니메뉴 없을경우 로그인,가입
+
+
+```react
+{!user && (
+	<>
+		<LinkWithIcon title='로그인' link='/login' emoji={idButton} />
+		<LinkWithIcon title='가입' link='/signup' emoji={memo} />
+	</>
+)}
+{user && (
+	<>
+		<LinkWithIcon title='내주문' link='/myorders' emoji={order} />
+		<LinkWithIcon title='로그아웃' link='/logout' emoji={lock} />
+		<NavLink to='/cart' className='align_center'>
+			장바구니 <p className='align_center cart_counts'>0</p>
+		</NavLink>
+	</>
+)}
+```
+
+<hr>
+
+# 로그아웃
+
+![LogOut](https://github.com/user-attachments/assets/76df0654-e271-4fcc-8849-19d50665fb75)
+
+- 로그아웃은 리턴이 필요없음 return null 토큰을 삭제하고 홈페이지로 이동.
+
+```react
+const Logout = () => {
+	localStorage.removeItem('token');
+	window.location = '/';
+
+	return null;
+};
+
+export default Logout;
+```
+
+- 라우팅에 추가.
+
+```react
+<Route path='/logout' element={<Logout />} />
+```
+
+<hr>
+
+# 장바구니 state 관리와 Navbar에 갯수 표시
+
+- 장바구니는 Navbar에서 보여주고, SingleProduct에서 추가. 두개의 컴포넌트의 공통부모인 App에서 선언
+
+![db relationship](https://github.com/user-attachments/assets/995b5112-c979-4cf0-9564-f2947da38ce7)
+
+- App 에 cart 스테이트.
+
+```react
+const [cart, setCart] = useState([]);
+```
+
+- Navbar에 cart의 갯수만 넘기기.
+
+```react
+<Navbar user={user} cartCount={cart.length} />
+```
+
+- Navbar에서 장바구니 갯수 표시.
+
+
+```react
+장바구니 <p className='align_center cart_counts'>{cartCount}</p>
+```
+
+<hr>
+
+# 장바구니 추가 => SingleProductPage
+
+- App에서 상품을 추가하는 함수 만들기.
+
+```react
+const addToCart = (product, quantity) => {
+		setCart([...cart, { product, quantity }]);
+	};
+```
+
+- 라우팅으로 전달.
+
+```react
+<Routing addToCart={addToCart} />
+```
+
+```react
+<SingleProductPage addToCart={addToCart} />
+```
+
+- SingleProductPage의 장바구니 추가 버튼
+
+```react
+ onClick={() => addToCart(product, quantity)}
+```
+
+![cart](https://github.com/user-attachments/assets/b42df0f6-6382-4c82-8763-1d8292cd7dcb)
+
+<hr>
