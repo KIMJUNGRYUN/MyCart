@@ -8,6 +8,10 @@ import { jwtDecode } from 'jwt-decode';
 const App = () => {
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
+
+  const addToCart = (product, quantity) => { //장바구니
+    setCart([...cart, {product, quantity}]);
+  }
   
   useEffect(() => {
     
@@ -30,7 +34,7 @@ const App = () => {
     <div className='app'>
         <Navbar user={user} cartCount={cart.length}/>
       <main>
-        <Routing />
+        <Routing addToCart={addToCart} />
       </main>
     </div>
   );
