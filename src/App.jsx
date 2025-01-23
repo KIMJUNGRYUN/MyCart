@@ -3,7 +3,10 @@ import './App.css'
 import Navbar from './components/Navbar/Navbar'
 import Routing from './components/Routing/Routing'
 import { jwtDecode } from 'jwt-decode';
+import setAuthToken from './utils/setAuthToken';
 
+
+setAuthToken(localStorage.getItem('token'));
 
 const App = () => {
   const [user, setUser] = useState(null);
