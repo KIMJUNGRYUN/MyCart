@@ -5,7 +5,8 @@ import Routing from './components/Routing/Routing'
 import { jwtDecode } from 'jwt-decode';
 import setAuthToken from './utils/setAuthToken';
 import { addToCartAPI } from './services/cartServices';
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 setAuthToken(localStorage.getItem('token'));
 
@@ -28,10 +29,10 @@ const App = () => {
 
     addToCartAPI(product._id, quantity)
       .then((res) => {
-        console.log(res.data);
+        toast.success('상품 추가 성공!');
       })
       .catch((err) => {
-        console.log(err.response);
+        toast.error('상품 추가 실패했습니다.');
       });
 	};
   
@@ -54,6 +55,7 @@ const App = () => {
   return (
     
     <div className='app'>
+        <ToastContainer position='bottom-right' />
         <Navbar user={user} cartCount={cart.length}/>
       <main>
       
