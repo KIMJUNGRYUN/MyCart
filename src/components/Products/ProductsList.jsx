@@ -62,7 +62,7 @@ const ProductsList = () => {
 						id={product._id}
 						image={product.images[0]}
 						price={product.price}
-						rating={product.rating}
+						rating={product.reviews.rate}
 						ratingCounts={product.reviews.counts}
 						stock={product.stock}
 					/>
