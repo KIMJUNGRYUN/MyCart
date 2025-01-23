@@ -13,12 +13,17 @@ const App = () => {
     try{
       const jwt = localStorage.getItem("token");
       const jwtUser = jwtDecode(jwt);
-      setUser(jwtUser);
-    }catch(error){} 
+
+      if(Date.now() >= jwtUser.exp * 1000){
+        localStorage.removeItem('token');
+        window.location.reload(); //재시작(새로고침)
+      }else{
+        setUser(jwtUser);
+      }
+      
+    }catch(error){}  //token이 없을 경우는 그냥 go
   }, []);  
  
-
-
   return (
     
     <div className='app'>
