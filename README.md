@@ -2355,4 +2355,404 @@ const { data, error, isLoading } = useData('/products');
 
 <hr>
 
+# 카테고리 별 상품보이기
+
+- ProductSidebar
+
+![product url](https://github.com/user-attachments/assets/11c2fd28-2fe9-41ee-9ee7-e15c7d68b938)
+
+- 링크 수정.
+
+```react
+link={`/products?category=${category.name}`}
+```
+
+- ProductsList 에서 아래와 같이 쿼리스트링을 받는다.
+
+```react
+const ProductsList = () => {
+	const [search, setSearch] = useSearchParams();
+	const category = search.get('category');
+```
+
+- 쿼리스트링 넘어온 category 값을 useData예 두번째 파라미터로 보내고 파라미터가 더 많아질것을 대비해서 객체로 넘기고 세번째 파라미터로 [category]를 넘김.
+
+
+```react
+	const { data, error, isLoading } = useData(
+		'/products',
+		{
+			params: {
+				category,
+			},
+		},
+		[category]
+	);
+```
+
+- useData 수정.
+
+```react
+const useData = (url, customConfig, deps) => {
+...
+
+  useEffect(
+    () => {
+      setIsLoading(true);
+      apiClient
+        .get(url, customConfig)
+        .then((res) => {
+          setData(res.data);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setIsLoading(false);
+        });
+    },
+    deps ? deps : []
+  );
+```
+
+- useEffect에  카테고리가 있을경우 [category] 가 바뀔때마다 다시 리렌더링하고 카테고리가 없으면 [ ] 시작할때 한번 렌더링.
+
+```react
+deps ? deps : []);
+```
+
+# 페이지네이션 ProductList 
+
+```react
+const page = search.get('page');
+```
+
+- useData 훅에 page 를 params에 넣고, page가 바뀌면 리렌더링 되도록 [category, page] 를 3번째 입력변수로 넣음.
+
+```react
+	const { data, error, isLoading } = useData(
+		'/products',
+		{
+			params: {
+				category,
+				page,
+			},
+		},
+		[category, page]
+	);
+```
+
+- 페이지 버튼을 클릭했을때 setSearch로 페이지 번호를 업데이트하면서 다른 카테고리 등은 그대로 두기위해 먼저 currentParams에 원래 있던 값들을 저장하여 setSearch에 먼저 넣고 page만 업데이트.
+
+
+```react
+	const handlePageChange = (page) => {
+		const currentParams = Object.fromEntries([...search]);
+		setSearch({ ...currentParams, page: page });
+	};
+​
+```
+
+- 아래쪽에 페이지 버튼을 만들어서 클릭해서 2페이지로 가는지 확인.
+
+```react
+<button onClick={() => handlePageChange(2)}>페이지 2</button>
+</div>
+</section>
+```
+
+<hr>
+
+
+# 페이지네이션 컴포넌트
+
+![Pagenation](https://github.com/user-attachments/assets/20573c95-bf45-4f2d-842e-c138dace07f4)
+
+- 다른곳에 자주 재사용가능하게 Common 폴더에 Pagination 만들기.
+
+- Pa
+```react
+import './Pagination.css';
+
+// 전체아이템개수 ,한페이지표시아이템수, 클릭함수, 현재페이지
+const Pagination = ({ total, perPage, onClick, currentPage }) => {
+	let pages = [];
+
+	for (let i = 1; i <= Math.ceil(total / perPage); i++) {
+		pages.push(i); //페이지수만큼 배열에 숫자를 입력한다.
+	}
+	//현재 페이지가 없을 경우 첫페이지 1이다.
+	currentPage = currentPage ? currentPage : 1;
+
+	return (
+		<>
+			{pages.length > 1 && (
+				<ul className='pagination'>
+					{pages.map((page) => (
+						<li key={page}>
+							<button
+								className={
+									parseInt(currentPage) === page ? 'pagination_button active' : 'pagination_button'
+								}
+								onClick={() => onClick(page)}
+							>
+								{page}
+							</button>
+						</li>
+					))}
+				</ul>
+			)}
+		</>
+	);
+};
+
+export default Pagination;
+```
+
+```css
+
+.pagination {
+	list-style: none;
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	margin: 16px;
+}
+
+.pagination_button {
+	width: 40px;
+	height: 40px;
+	margin: 0 10px;
+	font-size: 16px;
+	font-weight: 600;
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+	background-color: #fff;
+	color: #000;
+	cursor: pointer;
+	transition: all 0.2s ease-in-out;
+}
+
+.pagination_button.active {
+	background-color: #000;
+	color: #fff;
+}
+```
+
+<hr>
+
+# PageList에 Pagenation 적용
+
+- useData('/products'); 요청시 data는 아래와 같음. 여기에는 이미 totalProducts 정보가 있음.
+
+![useData](https://github.com/user-attachments/assets/9b4557a6-4914-4097-95cb-3ad515b46d45)
+
+```react
+    {/* 페이지네이션 넣기 */}
+      {data && (
+        <Pagination
+          total={data.totalProducts}
+          perPage={8}
+          onClick={handlePageChange}
+          currentPage={page}
+        />
+      )}
+    </section>
+```
+
+![pageNation1](https://github.com/user-attachments/assets/8c9acefd-2450-4ac2-bc56-e4fe46942f41)
+
+<hr>
+
+# SingleProductPage
+
+- 우선 ProductCard를 클릭했을때 주소를 체크.
+  - 화면에서 콘솔창(F12)으로 제품이미지 클릭시 주소와 아이디가 잘 나오는지 확인 ex) http://localhost:5173/product/64fbedd76b9bf5f33fea3966
+- 이상이 있을시 ProductCard에 가서 NavLink to의 주소를 꼭 확인!
+
+```react
+<NavLink to={`/product/${id}`}>
+	<img src={`http://localhost:5000/products/${image}`} alt='product image' />
+</NavLink>
+```
+
+- 이 제품이미지를 클릭하면 아래와 같은 라우팅 주소로 요청함.
+  - 라우팅 주소를 보면 id가 주소에 / id 형식으로 들어온다.
+ 
+```react
+	<Route path='/product/:id' element={<SingleProductPage />} />
+```
+
+- 싱글페이지에서 이 ID를 우선 변수로 입력받아야 함.
+  - 이때 리액트 라우터의 useParams를 사용하자.
+
+​```react
+const SingleProductPage = () => {
+	const [selectedImage, setSelectedImage] = useState(0);
+	const { id } = useParams();
+	console.log(id);
+
+	const { data: product, error, isLoading } = useData(`/products/${id}`);
+	console.log(product);
+ ```
+
+- 이제 useData를 이용해 동적으로 product를 입력받으므로 const product객체는 이제 삭제.
+- 콘솔로 product 객체가 잘 나오는지도 확인하고 product 객체가 아직 서버의 응답이 없을경우는 { } 빈 객체값이 나오는데 이를 체크하기 위해서 아래에 product._id가 있을경우에만 화면을 표시.
+
+```react
+
+ <section className='align_center single_product'>
+       {err && <em className='form_error'>{err}</em>}
+       {isLoading && <Loader />}
+        {product._id && (
+            <>
+            <div className='align_center'>
+            <div className='single_product_thumbnails'>
+                {product.images.map((image, index) => (
+                    <img
+                        key={index}
+                        src={`http://localhost:5000/products/${image}`}
+                        alt={product.title}
+                        className={selectedImage === index ? 'selected_image' : ''}
+                        onClick={() => setSelectedImage(index)}
+                    />
+                ))}
+            </div>
+
+            <img
+                src={`http://localhost:5000/products/${product.images[selectedImage]}`}
+                alt={product.title}
+                className='single_product_display'
+            />
+        </div>
+
+        <div className='single_product_details'>
+				<h1 className='single_product_title'>{product.title}</h1>
+				<p className='single_product_description'>{product.description}</p>
+				<p className='single_product_price'>￦ {product.price.toLocaleString('ko-KR')} 원</p>
+
+				<h2 className='quantity_title'>구매개수:</h2>
+				<div className='align_center quantity_input'>
+                <QuantityInput quantity={quantity} setQuantity={setQuantity} stock={product.stock} />
+                </div>
+
+				<button className='search_button add_cart'>장바구니 추가</button>
+			</div>
+            </>
+```
+
+- 이미지주소들도 벡엔드의 이미지주소로 수정.
+
+```react
+<img
+	  src={`http://localhost:5000/products/${image}`}
+```
+
+- 마찬가지로 선택한 이미지도 백엔드에서 가져옴.
+
+```react
+<img
+	  src={`http://localhost:5000/products/${product.images[selectedImage]}`}
+```
+
+```react
+	</>
+   )}
+</section>
+```
+
+<hr>
+
+# Loader 컴포넌트 Common 폴더에 추가하고 프로덕트 싱글페이지에 적용하기
+
+- 로더 컴포넌트는 실제 서비스에서 벡엔드 서버가 데이터를 가져오는 잠깐동안의 시간에 isLoading이 true인 동안에 로딩중을 나타내는 화면을 표시하기 위함이다. 로컬에서 진행중일때는 알지 못하기 때문에 Network에서 Fast3G에 체크하고 재시작하면 조금 보이게 됨.
+
+
+![Loader](https://github.com/user-attachments/assets/33af9f6c-48b4-4616-9d57-a5e55f606603)
+
+```react
+import './Loader.css';
+
+const Loader = () => {
+	return (
+		<div>
+			<div className='lds-ellipsis'>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+			</div>
+		</div>
+	);
+};
+
+export default Loader;
+```
+
+```css
+.lds-ellipsis {
+	display: inline-block;
+	position: relative;
+	width: 80px;
+	height: 80px;
+}
+.lds-ellipsis div {
+	position: absolute;
+	top: 33px;
+	width: 13px;
+	height: 13px;
+	border-radius: 50%;
+	background: #cdcdcd;
+	animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+	left: 8px;
+	animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+	left: 8px;
+	animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+	left: 32px;
+	animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+	left: 56px;
+	animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+	0% {
+		transform: scale(0);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+@keyframes lds-ellipsis3 {
+	0% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0);
+	}
+}
+@keyframes lds-ellipsis2 {
+	0% {
+		transform: translate(0, 0);
+	}
+	100% {
+		transform: translate(24px, 0);
+	}
+}
+​
+```
+
+- 싱글프로젝트 페이지에서 에러와 프로덕트 사이에 넣기.
+
+```react
+{error && <em className='form_error'>{error}</em>}
+			{isLoading && <Loader />}
+			{product._id && (
+```
+
 
