@@ -4,6 +4,7 @@ import Navbar from './components/Navbar/Navbar'
 import Routing from './components/Routing/Routing'
 import { jwtDecode } from 'jwt-decode';
 import setAuthToken from './utils/setAuthToken';
+import { addToCartAPI } from './services/cartServices';
 
 
 setAuthToken(localStorage.getItem('token'));
@@ -24,6 +25,14 @@ const App = () => {
 			updatedCart[productIndex].quantity += quantity;
 		}
 		setCart(updatedCart);
+
+    addToCartAPI(product._id, quantity)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err.response);
+      });
 	};
   
   useEffect(() => {
@@ -47,6 +56,7 @@ const App = () => {
     <div className='app'>
         <Navbar user={user} cartCount={cart.length}/>
       <main>
+      
         <Routing addToCart={addToCart} />
       </main>
     </div>
