@@ -1,22 +1,33 @@
 import React, { useRef, useState } from 'react'
 import './LoginPage.css';
 import { useForm } from 'react-hook-form';
+import { login } from '../../services/userServices';
 
 const LoginPage = () => {
+	const [formError, setFormError] = useState('');
+	const {
+			register,
+			handleSubmit,
+			reset,
+			formState: { errors },
+		} = useForm();
+
+
+
 	// useRef Hook 함수 
 	// const passwordRef = useRef(null);
 	
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	  } = useForm();
+	
+		const submitData = async(formData) => {
+		try{
+			await login(formData);
+			window.location = '/'; //로그인 후 홈페이지로 이동
+		}catch(err){
+			setFormError(err.response.data.message);
+		}
+	
+	};
 
-	const submitData = (formData) => {
-		console.log(formData);
-		reset();
-	}
 	
 	// const [user, setUser] = useState({
 	// 	email: '',
@@ -79,12 +90,13 @@ const LoginPage = () => {
 						</button> */}
 						
 					</div>
-			
+					{formError && <em className='form_error'>{formError}</em>}
 					<button 
 						type='submit' 
 						className='search_button form_submit'>
 						Submit
 					</button>
+					
 				</div>
 			</form>
 		</section>
