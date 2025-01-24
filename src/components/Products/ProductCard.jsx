@@ -4,9 +4,12 @@ import basket from '../../assets/basket.png';
 import './ProductCard.css';
 import { NavLink } from 'react-router-dom';
 import CartContext from '../../contexts/CartContext';
+import UserContext from '../../contexts/UserContext';
 
 const ProductCard = ({ product }) => {
 	const {addToCart} = useContext(CartContext);
+	const user = useContext(UserContext);
+
   return (
     <article className='product_card'>
 			<div className='product_image'>
@@ -28,10 +31,13 @@ const ProductCard = ({ product }) => {
 						<p className='product_review_count'>{product?.reviews.counts}</p>
 					</div>
 					{/* 재고수가 1개 이상일때만 장바구니 가능 */}
-					{product > 0 && (
-					<button className='add_to_cart' onClick={() => addToCart(product, 1)}>
-						<img src={basket} alt='basket button' />
-					</button>
+					{user && product?.stock > 0 && (
+						<button 
+							className='add_to_cart' 
+							onClick={() => addToCart(product, 1)}
+						>
+							<img src={basket} alt='basket button' />
+						</button>
 					)}
 				</footer>
 			</div>

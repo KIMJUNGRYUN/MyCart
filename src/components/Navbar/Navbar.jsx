@@ -25,6 +25,8 @@ const Navbar = ({user, cartCount}) => {
     </div>
     
     <div className='align_center navbar_links'>
+        <LinkWithIcon title='홈페이지' link='/' emoji={rocket} />
+        <LinkWithIcon title='상품들' link='/products' emoji={star} />
       {!user && (
         <>
           <LinkWithIcon title='로그인' link='/login' emoji={idButton} />
@@ -32,10 +34,10 @@ const Navbar = ({user, cartCount}) => {
 
         </>
       )}
+    
+      
       {user && (   
         <>
-          <LinkWithIcon title='홈페이지' link='/' emoji={rocket} />
-          <LinkWithIcon title='상품들' link='/products' emoji={star} />
           <LinkWithIcon title='주문보기' link='/myorders' emoji={order} />
           <LinkWithIcon title='로그아웃' link='/logout' emoji={lock} />
           <NavLink to='/cart' className='align_center'>
@@ -43,7 +45,7 @@ const Navbar = ({user, cartCount}) => {
           </NavLink>
         </>
       )}
-
+        
     
 			</div>
     <div className='align_center navbar_links'>

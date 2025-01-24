@@ -28,7 +28,7 @@ const App = () => {
 
   const updateCart = (type, id) =>{  
     const updatedCart = [...cart];
-    
+
     const productIndex  = updatedCart.findIndex(
       (item) => item.product._id === id
     );
@@ -106,7 +106,7 @@ const App = () => {
  
   return (
     <UserContext.Provider value={user}>
-      <CartContext.Provider value={{cart, addToCart, removeFromCart, updateCart}}>
+      <CartContext.Provider value={{cart, addToCart, removeFromCart, updateCart, setCart}}>
       <div className='app'>
         <ToastContainer position='bottom-right' />
         <Navbar user={user} cartCount={cart.length}/>

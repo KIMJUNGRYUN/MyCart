@@ -62,7 +62,6 @@ const ProductsList = () => {
 						product={product}
 					/>
 				))}
-				
 			</div>
 			{/* 페이지네이션 */}
 			
