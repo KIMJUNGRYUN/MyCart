@@ -59,14 +59,10 @@ const ProductsList = () => {
 					data.products.map((product) => (
 					<ProductCard
 						key={product._id}
-						id={product._id}
-						image={product.images[0]}
-						price={product.price}
-						rating={product.reviews.rate}
-						ratingCounts={product.reviews.counts}
-						stock={product.stock}
+						product={product}
 					/>
 				))}
+				
 			</div>
 			{/* 페이지네이션 */}
 			

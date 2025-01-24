@@ -28,6 +28,7 @@ const App = () => {
 
   const updateCart = (type, id) =>{  
     const updatedCart = [...cart];
+    
     const productIndex  = updatedCart.findIndex(
       (item) => item.product._id === id
     );
@@ -35,6 +36,7 @@ const App = () => {
     if(type === 'increase'){
       updatedCart[productIndex].quantity += 1;
       setCart(updatedCart); 
+
       increaseProductAPI(id).catch((err) => {
       toast.error('상품 증가 에러');
       });
@@ -43,6 +45,7 @@ const App = () => {
     if(type === "decrease"){
       updatedCart[productIndex].quantity -= 1;
       setCart(updatedCart); 
+
       decreaseProductAPI(id).catch((err) => {
       toast.error('상품 감소 에러');
       });
