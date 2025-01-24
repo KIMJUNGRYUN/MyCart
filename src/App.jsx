@@ -9,6 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserContext from './contexts/UserContext';
 import CartContext from './contexts/CartContext';
+import ProtectedRoute from './components/Routing/ProtectedRoute';
 
 setAuthToken(localStorage.getItem('token'));
 
@@ -103,15 +104,17 @@ const App = () => {
 
     }catch(error){}  //token이 없을 경우는 그냥 go
   }, []);  
+  
  
   return (
     <UserContext.Provider value={user}>
       <CartContext.Provider value={{cart, addToCart, removeFromCart, updateCart, setCart}}>
-      <div className='app'>
+      <div className='app'> <Navbar user={user} cartCount={cart.length}/>
         <ToastContainer position='bottom-right' />
-        <Navbar user={user} cartCount={cart.length}/>
+       
       <main>
-        <Routing />
+        <Routing user={user}/>
+      
       </main>
       </div>
       </CartContext.Provider>

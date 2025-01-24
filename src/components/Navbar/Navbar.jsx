@@ -22,16 +22,18 @@ const Navbar = ({user, cartCount}) => {
                 검색하기
             </button>
         </form>
+        
     </div>
     
     <div className='align_center navbar_links'>
         <LinkWithIcon title='홈페이지' link='/' emoji={rocket} />
         <LinkWithIcon title='상품들' link='/products' emoji={star} />
+
+
       {!user && (
         <>
           <LinkWithIcon title='로그인' link='/login' emoji={idButton} />
           <LinkWithIcon title='회원가입' link='/signup' emoji={memo} />
-
         </>
       )}
     
@@ -46,7 +48,6 @@ const Navbar = ({user, cartCount}) => {
         </>
       )}
         
-    
 			</div>
     <div className='align_center navbar_links'>
   
