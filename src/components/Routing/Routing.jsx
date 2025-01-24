@@ -18,7 +18,7 @@ const Routing = ({addToCart}) => {
 			<Route path='/signup' element={<SignupPage />} />
 			<Route path='/login' element={<LoginPage />} />
 			<Route path='/logout' element={<Logout />} />
-			<Route path='/cart' element={<CartPage />} />
+			<Route path='/cart' element={<CartPage cart={cart} />} />
 			<Route path='/myorders' element={<MyOrderPage />} />
 		</Routes>
 	);
