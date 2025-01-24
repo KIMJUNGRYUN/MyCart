@@ -3165,3 +3165,124 @@ const addToCart = (product, quantity) => {
 ![cart](https://github.com/user-attachments/assets/b42df0f6-6382-4c82-8763-1d8292cd7dcb)
 
 <hr>
+
+# 장바구니에 같은 제품도 게속 추가 되는 문제해결
+
+- App
+
+```react
+const addToCart = (product, quantity) => {
+		const updatedCart = [...cart];
+		const productIndex = updatedCart.findIndex(
+			(item) => item.product._id === product._id
+		);
+		if (productIndex === -1) {
+			updatedCart.push({ product: product, quantity: quantity });
+		} else {
+			updatedCart[productIndex].quantity += quantity;
+		}
+		setCart(updatedCart);
+	};
+```
+
+- 갯수도 확인.
+
+
+
+![number](https://github.com/user-attachments/assets/cb9c28d3-fe17-4894-b653-6346c9bed711)
+
+<hr>
+
+# 인증된 유저만 사용가능 API
+
+- 장바구니 cart에 새 제품과 수량을 업데이트 하는 요청
+
+![Autho api](https://github.com/user-attachments/assets/b788e68e-11a2-4083-8a05-0c4c0c817597)
+
+![setAutho](https://github.com/user-attachments/assets/89e694d8-cba7-4e2f-b5c5-1c589d812209)
+
+```react
+import apiClient from "./api-client";
+
+//axios의 헤더에 토큰을 추가한다.
+const setAuthToken = (token) => {
+  if (token) {
+    apiClient.defaults.headers.common["x-auth-token"] = token;
+  } else {
+    delete apiClient.defaults.headers.common["x-auth-token"];
+  }
+};
+
+export default setAuthToken;
+​
+```
+
+- App import
+
+```react
+setAuthToken(localStorage.getItem('token'));
+
+const App = () => {
+```
+
+<hr>
+
+-  App에 적용해 addToCart에서 벡엔드의 카트 업데이트(cartServices.js)
+
+
+- 백엔드 서버에 카드관련 서비스를 담당할 파일 cartSercies.js 만들기.
+
+![CartService](https://github.com/user-attachments/assets/3a6bb6f7-e928-4884-9218-c447cc62cbb1)
+
+-  카트에 제품id와 수량을 추가.
+
+```react
+import apiClient from "../utils/api-client";
+
+export function addToCartAPI(id, quantity) {
+  return apiClient.post(`/cart/${id}`, { quantity });
+}
+```
+
+- App
+
+```react
+ setCart(updatedCart);
+
+		addToCartAPI(product._id, quantity)
+			.then((res) => {
+				console.log(res.data);
+			})
+			.catch((err) => {
+				console.log(err.response);
+			});
+	};
+```
+
+![cartServices](https://github.com/user-attachments/assets/26271238-b89a-4d7f-b9d3-ce7f9b6eed2a)
+
+<hr>
+
+# react-toastify 설치 및 toastify 메시지 
+
+```react
+$ npm i react-toastify
+```
+
+- App 추가
+
+```react
+import { ToastContainer, toast } from 'react-toastify';
+```
+
+```react
+addToCartAPI(product._id, quantity)
+			.then((res) => {
+				toast.success('상품 추가 성공!');
+			})
+			.catch((err) => {
+				toast.error('상품 추가에 실패했습니다.');
+			});
+```
+
+- main의 Rounting 위에 
