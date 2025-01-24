@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import './CartPage.css';
 import remove from '../../assets/remove.png';
-import user from '../../assets/user.webp';
 import Table from '../Common/Table';
 import QuantityInput from '../SingleProduct/QuantityInput';
+import UserContext from '../../contexts/UserContext';
+import CartContext from '../../contexts/CartContext';
 
-const CartPage = ({ cart }) => {
+const CartPage = () => {
     // console.log(cart);
     const [subTotal, setSubTotal] = useState(0);
+    const {cart, removeFromCart, updateCart, } = useContext(CartContext);
+    const user = useContext(UserContext); //useContext로 UseContext 가져오기
 
     useEffect(() => {
         let total = 0;
@@ -20,10 +23,10 @@ const CartPage = ({ cart }) => {
   return (
     <section className='align_center cart_page'>
         <div className='align_center user_info'>
-            <img src={user} alt='user profile' />
+            <img src={`http://localhost:5000/profile/${user?.profilePic}`} alt='user profile' />
             <div>
-                <p className='user_name'>Dooly</p>
-                <p className='user_email'>dooly@naver.com</p>
+                <p className='user_name'>{user?.name}</p>
+                <p className='user_email'>{user?.email}</p>
             </div>
         </div>
 
@@ -35,15 +38,20 @@ const CartPage = ({ cart }) => {
                 <td>{product.title}</td>
                 <td>{(product.price).toLocaleString("ko-KR")} 원</td>
                 <td className='align_center table_quantity_input'>
-                    <QuantityInput  quantity={quantity} stock={product.stock}/>
+                    <QuantityInput  
+                        quantity={quantity} 
+                        stock={product.stock} 
+                        setQuantity={updateCart} 
+                        cartPage={true} 
+                        productId={product._id}
+                    />
                 </td>
                 <td>{(quantity * product.price).toLocaleString("ko-KR")} 원</td>
                 <td>
-					<img src={remove} alt='remove icon' className='cart_remove_icon' />
+					<img onClick={() => removeFromCart(product._id)} src={remove} alt='remove icon' className='cart_remove_icon' />
 				</td>
             </tr>
             ))}
-            
         </tbody>
     </Table>
 
@@ -55,7 +63,7 @@ const CartPage = ({ cart }) => {
 					</tr>
 					<tr>
 						<td>배송비</td>
-						<td>5,000 원</td>
+						<td>3,000 원</td>
 					</tr>
 					<tr className='cart_bill_final'>
 						<td>결재금액</td>

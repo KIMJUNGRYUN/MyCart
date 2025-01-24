@@ -4,15 +4,50 @@ import Navbar from './components/Navbar/Navbar'
 import Routing from './components/Routing/Routing'
 import { jwtDecode } from 'jwt-decode';
 import setAuthToken from './utils/setAuthToken';
-import { addToCartAPI, getCartAPI } from './services/cartServices';
+import { addToCartAPI,  decreaseProductAPI,  getCartAPI,  increaseProductAPI,  removeFromCartAPI } from './services/cartServices';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UserContext from './contexts/UserContext';
+import CartContext from './contexts/CartContext';
 
 setAuthToken(localStorage.getItem('token'));
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
+
+  const removeFromCart = (id) => {
+    const oldCart = [...cart];
+    const newCart = oldCart.filter((item) => item.product._id !== id);
+    setCart(newCart);
+
+    removeFromCartAPI(id).catch((err) => {
+      toast.err('장바구니 상품 삭제 에러');
+    });
+  }
+
+  const updateCart = (type, id) =>{  
+    const updatedCart = [...cart];
+    const productIndex  = updatedCart.findIndex(
+      (item) => item.product._id === id
+    );
+  
+    if(type === 'increase'){
+      updatedCart[productIndex].quantity += 1;
+      setCart(updatedCart); 
+      increaseProductAPI(id).catch((err) => {
+      toast.error('상품 증가 에러');
+      });
+    }
+
+    if(type === "decrease"){
+      updatedCart[productIndex].quantity -= 1;
+      setCart(updatedCart); 
+      decreaseProductAPI(id).catch((err) => {
+      toast.error('상품 감소 에러');
+      });
+    }
+  };
  
   //장바구니
 	const addToCart = (product, quantity) => {
@@ -67,14 +102,17 @@ const App = () => {
   }, []);  
  
   return (
-    <div className='app'>
+    <UserContext.Provider value={user}>
+      <CartContext.Provider value={{cart, addToCart, removeFromCart, updateCart}}>
+      <div className='app'>
         <ToastContainer position='bottom-right' />
         <Navbar user={user} cartCount={cart.length}/>
       <main>
-      
-        <Routing addToCart={addToCart} cart={cart}/>
+        <Routing />
       </main>
-    </div>
+      </div>
+      </CartContext.Provider>
+    </UserContext.Provider>
   );
 };
 

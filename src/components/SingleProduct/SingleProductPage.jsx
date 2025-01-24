@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import './SingleProductPage.css';
 import QuantityInput from './QuantityInput';
 import { useParams } from 'react-router-dom';
 import useData from '../../Hook/useData';
 import Loader from '../Common/Loader';
+import CartContext from '../../contexts/CartContext';
 
 //서버에서 가져오는 제품 데이터 객체 (임시)
 // const product = {
@@ -21,10 +22,12 @@ import Loader from '../Common/Loader';
 //     stock: 10, //재고
 // };
 
-const SingleProductPage = ({addToCart}) => {
+const SingleProductPage = () => {
+    const {addToCart} = useContext(CartContext);
     const [quantity, setQuantity ] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const { id } = useParams();
+    
 
     const {data: product, err, isLoading} = useData(`products/${id}`);
     console.log(product);
@@ -61,7 +64,13 @@ const SingleProductPage = ({addToCart}) => {
 
 				<h2 className='quantity_title'>구매개수:</h2>
 				<div className='align_center quantity_input'>
-                <QuantityInput quantity={quantity} setQuantity={setQuantity} stock={product.stock} />
+                <QuantityInput 
+                    quantity={quantity} 
+                    setQuantity={setQuantity} 
+                    stock={product.stock} 
+                    cartPage={false}
+                />
+                 
                 </div>
 
 				<button 
