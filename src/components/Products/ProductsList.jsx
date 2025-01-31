@@ -10,6 +10,7 @@ const ProductsList = () => {
 	const [search, setSearch] = useSearchParams(); //요청주소 뒤의 쿼리 스트링
 	const category = search.get('category'); //categor=값 을 가져옴
 	const page = search.get('page');
+	const searchQuery = search.get('search');
 
 	const handlePageChange = ((page) => {
 		//기존의 검색한 카테고리가 있으면 유지하면서 페이지만 업데이트
@@ -21,13 +22,14 @@ const ProductsList = () => {
 		"products",
 		{
 			params: {
+				search: searchQuery,
 				// category: category,
 				category, 
 				// page: page,
 				page,
 			},
 		},
-		[category, page]
+		[searchQuery, category, page]
 	);
 
 	const skeleton = [1,2,3,4,5,6,7,8];
