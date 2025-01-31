@@ -3285,4 +3285,826 @@ addToCartAPI(product._id, quantity)
 			});
 ```
 
-- main의 Rounting 위에 
+- main의 Rounting 위에
+
+# 유저의 카트를 가져오기 from 백엔드, 카드정보를 카트페이지로 전달
+
+- cartServices.js 에 벡엔드에서 카트정보를 가져오는 함수를 만들기.
+
+```react
+export async function getCartAPI() {
+  return await apiClient.get("/cart");
+}
+```
+
+- App 에 getCart함수를 만들어서 벡엔드에서 카트 데이터를 가져옴.
+  - 이때 useEffect를 써서 유저가 바뀌면 그 유저의 카트 데이터를 가져오게 함.
+
+
+```react
+	const getCart = () => {
+		getCartAPI()
+			.then((res) => {
+				setCart(res.data);
+			})
+			.catch((err) => {
+				toast.error('카트 가져오기에 실패했습니다.');
+			});
+	};
+
+	useEffect(() => {
+		getCart();
+	}, [user]);
+```
+
+- 카트정보를 가져오는 함수를 카트 페이지로 전달하기.
+
+```react
+<Routing addToCart={addToCart} cart={cart} />
+```
+
+- Routing
+
+```react
+const Routing = ({ addToCart, cart}) => {
+```
+
+```react
+<Route path='/cart' element={<CartPage cart={cart} />} />
+```
+
+- 카트 페이지에서 페이지 시작할때 벡엔드에서 카트정보를 가져옴.
+
+```react
+const CartPage = ({ cart }) => {
+
+```
+<hr>
+
+# 카트페이지에 카드정보를 계산해 표시
+
+```recat
+const CartPage = ({ cart }) => {
+	console.log(cart);
+```
+
+![array](https://github.com/user-attachments/assets/9edb8925-2f99-42da-b830-701afad98db8)
+
+
+```react
+<tbody>
+	  {cart.map(({ product, quantity }) => (
+	  <tr key={product._id}>
+		<td>{product.title}</td>
+		<td>{product.price.toLocaleString('ko-KR')} 원</td>
+		<td className='align_center table_quantity_input'>
+			<QuantityInput quantity={quantity} stock={product.stock} />
+		</td>
+		<td>{(quantity * product.price).toLocaleString('ko-KR')} 원</td>
+		<td>
+			<img src={remove} alt='remove icon' className='cart_remove_icon' />
+		</td>
+	   </tr>
+	 ))}
+	</tbody>
+```
+
+![dooly](https://github.com/user-attachments/assets/9d949469-acc4-47d2-8113-5d3aceac878c)
+
+- 카트페이지 상단에 subTotal 스테이트 만들기 (배송비 뺀 합계).
+
+```react
+const CartPage = ({ cart }) => {
+	const [subTotal, setSubTotal] = useState(0);
+```
+
+- 카트가 수정될때마다 합계 계산하기.
+
+```react
+useEffect(() => {
+		let total = 0;
+		cart.forEach((item) => {
+			total += item.product.price * item.quantity;
+		});
+		setSubTotal(total);
+	}, [cart]);
+```
+
+- 아래쪽 간단한 계산 테이블에 입력하기
+
+```react
+<tr>
+						<td>총 금액</td>
+						<td>{subTotal.toLocaleString('ko-KR')} 원</td>
+					</tr>
+					<tr>
+						<td>배송비</td>
+						<td>3,000 원</td>
+					</tr>
+					<tr className='cart_bill_final'>
+						<td>결재금액</td>
+						<td>{(subTotal + 3000).toLocaleString('ko-KR')} 원</td>
+					</tr>
+```
+
+![doolypay](https://github.com/user-attachments/assets/d6df425b-06fc-4f32-9e52-ed7bed5913e5)
+
+<hr>
+
+# UserContext 만들어 적용
+
+![userContext](https://github.com/user-attachments/assets/1dd5fdf9-3f4f-4bc2-a7c5-c8bb64279efd)
+
+```react
+import { createContext } from "react";
+
+const UserContext = createContext(null);
+
+export default UserContext;
+```
+
+- App 에 UserContext를 가져오기.
+
+```react
+import UserContext from './contexts/UserContext';
+```
+
+- 모든 컴포넌트에서 user를 사용가능하도록 Provider로 감싸기.
+
+```react
+return (
+		<UserContext.Provider value={user}>
+			<div className='app'>
+				...
+			</div>
+		</UserContext.Provider>
+	);
+};
+```
+
+- 바로 CartPage로 가서 useContext(유저컨텍스트)로 user객체를 받는다.
+
+```react
+import React, { useEffect, useState, useContext } from 'react';
+import UserContext from '../../contexts/UserContext';
+```
+
+- User 이미지는 삭제.
+
+```react
+const CartPage = ({ cart }) => {
+	const [subTotal, setSubTotal] = useState(0);
+	const userObj = useContext(UserContext);
+	console.log(userObj);
+```
+
+![object1](https://github.com/user-attachments/assets/8a2eeb93-a152-4bcf-8d7d-37ab7dfeb051)
+
+- 이렇게 해서 user 정보를 바로 CartPage에서  useContext(UserContext)를 사용해 받음.
+
+```react
+<div className='align_center user_info'>
+				<img src={`http://localhost:5000/profile/${user?.profilePic}`} alt='user profile' />
+				<div>
+					<p className='user_name'>{user?.name}</p>
+					<p className='user_email'>{user?.email}</p>
+				</div>
+			</div>
+```
+
+![payment](https://github.com/user-attachments/assets/08b5a716-fb1c-42c0-bab1-8540c781c4f6)
+
+<hr>
+
+# CartContext 만들어 적용하기
+
+- 1.카트 컨텍스트
+  
+![CartContext](https://github.com/user-attachments/assets/f0750cb3-46c7-4204-a79c-10bf0edf51eb)
+
+- 2.App에 Provider적용  value에 cart 와 addToCart 함수를 적용
+
+```react
+		<UserContext.Provider value={user}>
+			<CartContext.Provider value={{ cart, addToCart }}>
+				<div className='app'>
+					...
+				</div>
+			</CartContext.Provider>
+		</UserContext.Provider>
+```
+
+- 3.각각의 사용컴포넌트에 적용하기 App에서 Routing 프롭스 제거
+
+```react
+<Routing />
+```
+
+- 라우팅에서 cart 나 addToCart 프롭스 제거.
+
+```react
+<Route path='/product/:id' element={<SingleProductPage />} />
+```
+
+```react
+<Route path='/cart' element={<CartPage />} />
+```
+
+- CartPage
+
+```react
+const CartPage = () => {
+	...
+	const { cart, addToCart } = useContext(CartContext);
+```
+
+- SingleProductPage
+
+```react
+const SingleProductPage = () => {
+	const { addToCart } = useContext(CartContext);
+```
+
+<hr>
+
+# 장바구니의 상품삭제 추가
+
+- App
+
+```react
+const removeFromCart = (id) => {
+		const oldCart = [...cart];
+		const newCart = oldCart.filter((item) => item.product._id !== id);
+		setCart(newCart);
+	};
+```
+
+- CartProvider에 추가
+
+```react
+value={{ cart, addToCart, removeFromCart }}>
+```
+
+- 카트 페이지
+
+```react
+const { cart, removeFromCart } = useContext(CartContext);
+```
+
+- 삭제아이콘에 추가하기
+
+```react
+onClick={() => removeFromCart(product._id)}
+```
+
+<hr>
+
+# 백엔드에 아이템 삭제
+
+- cartServices.js 벡엔드의 cart에 상품 삭제.
+
+```react
+export function removeFromCartAPI(id) {
+  return apiClient.patch(`/cart/remove/${id}`);
+}
+```
+
+- App의 removeFromCart 에 추가하기.
+
+```react
+removeFromCartAPI(id).catch((err) => {
+			toast.error('장바구니 상품 삭제 에러');
+		});
+```
+
+<hr>
+
+# 장바구니에서 상품 증가 감소
+
+- App 에 상품을 type에 따라서 증가, 감소시키는 함수 작성
+
+```react
+onst updateCart = (type, id) => {
+		const updatedCart = [...cart];
+		const productIndex = updatedCart.findIndex((item) => item.product._id === id);
+
+		if (type === 'increase') {
+			updatedCart[productIndex].quantity += 1;
+			setCart(updatedCart);
+		}
+		if (type === 'decrease') {
+			updatedCart[productIndex].quantity -= 1;
+			setCart(updatedCart);
+		}
+	};
+```
+
+- CartContext의 Provider value에 추가.
+
+```react
+value={{ cart, addToCart, removeFromCart, updateCart }}>
+```
+
+- 카트페이지에서 updateCart 가져오기.
+
+```react
+const { cart, removeFromCart, updateCart } = useContext(CartContext);
+```
+
+- QuantityInput에 프롭스 전달.
+
+```react
+<QuantityInput
+									quantity={quantity}
+									stock={product.stock}
+									setQuantity={updateCart}
+									cartPage={true}
+									productId={product._id}
+								/>
+```
+
+- QuantityInput에 추가하기.
+
+```react
+const QuantityInput = ({ ... cartPage, productId }) => {
+```
+
+- 감소, 증가 버튼에 추가하기.
+
+```react
+onClick={() => {
+   cartPage ? setQuantity('decrease', productId) : setQuantity((prev) => prev - 1);
+}}
+```
+
+- 벡엔드 API 추가하기 cartServices.
+
+```react
+export function increaseProductAPI(id) {
+  return apiClient.patch(`/cart/increase/${id}`);
+}
+
+export function decreaseProductAPI(id) {
+  return apiClient.patch(`/cart/decrease/${id}`);
+}
+```
+
+- App의 updateCart에 increase 일때
+
+```react
+			increaseProductAPI(id).catch((err) => {
+				toast.error('상품 증가 에러');
+			});
+```
+
+- updateCart에 decrease 일때
+
+
+```react
+decreaseProductAPI(id).catch((err) => {
+				toast.error('상품 감소 에러');
+			});
+```
+
+<hr>
+
+# ProductCard 에서 바로 장바구니 담기
+
+- 우선 ProductList 로 가서 대신에 product만 전달.
+
+![ProductCard add](https://github.com/user-attachments/assets/e7792e6a-713e-491c-b08d-e262a77e5832)
+
+```react
+	<ProductCard
+			key={product._id}
+			product={product}
+		/>
+```
+
+- ProductCard
+
+```react
+const ProductCard = ({ product }) => {
+	const { addToCart } = useContext(CartContext);
+```
+
+- 모든 변수들을 product?.를 앞에 붙여서 수정.
+
+```react
+<NavLink to={`/product/${product?._id}`}>
+```
+
+- 이미지는 아래처럼 수정
+
+```react
+<img src={`http://localhost:5000/products/${product?.images[0]}`}
+```
+
+- 수정
+
+```react
+{product?.price.toLocaleString('ko-KR')} 원
+```
+
+```react
+{product?.title}
+```
+
+```react
+{product?.reviews.rate}
+```
+
+```react
+{product?.reviews.counts}
+```
+
+- stock도 수정하고 장바구니아이콘 클릭시 addToCart로 추가한다. 수량은 1개로 한다.
+
+```react
+{product?.stock > 0 && (
+	<button className='add_to_cart' onClick={() => addToCart(product, 1)}>
+		<img src={basket} alt='basket button' />
+	</button>
+)}
+```
+
+<hr>
+
+# 인증된 유저만 장바구니 담기
+
+- ProductCard 에 user를 추가 (useContext사용)
+
+```react
+const ProductCard = ({ product }) => {
+	const { addToCart } = useContext(CartContext);
+	const user = useContext(UserContext);
+```
+
+- 유저가 있을 경우에만 장바구니 버튼 보임
+
+```react
+{product?.stock > 0 && user && (
+```
+
+
+![product button](https://github.com/user-attachments/assets/b3e63ad7-dc26-46c6-a413-95df5fc7cf7c)
+
+
+- SingleProductPage 에도 user 추가.
+
+```react
+const SingleProductPage = () => {
+	const { addToCart } = useContext(CartContext);
+	const user = useContext(UserContext);
+```
+
+- 유저가 로그인 했을경 우에만 구매 장바구니 가능.
+
+```react
+{user && (
+	<>
+		<h2 className='quantity_title'>구매개수:</h2>
+		<div className='align_center quantity_input'>
+			<QuantityInput
+				quantity={quantity}
+				setQuantity={setQuantity}
+				stock={product.stock}
+			/>
+		</div>
+
+		<button
+			className='search_button add_cart'
+			onClick={() => addToCart(product, quantity)}
+		>
+			장바구니 추가
+		</button>
+	</>
+)}
+
+```
+
+![button](https://github.com/user-attachments/assets/3b77e678-290b-4741-9c1b-60eb497577a6)
+
+<hr>
+
+# checkout 주문하기.
+
+![orderService](https://github.com/user-attachments/assets/0bc92359-0d53-4c33-8573-4a7a771f611b)
+
+```react
+import apiClient from '../utils/api-client';
+
+export function checkoutAPI() {
+  return apiClient.post("/order/checkout");
+}
+```
+
+- App 의 CartContext에 setCart를 추가.
+
+```react
+<CartContext.Provider value={{ ..., setCart }}>
+```
+
+- CartPage에서 setCart를 가져옴.(컨텍스트)
+
+```react
+const { ..., setCart } = useContext(CartContext);
+```
+
+- CartPage에서 체크아웃 함수 작성.
+
+```react
+const checkout = () => {
+		const oldCart = [...cart];
+		setCart([]); //카트 비우기
+		checkoutAPI()
+			.then(() => {
+				toast.success('주문 성공!');
+			})
+			.catch(() => {
+				toast.error('checkout 중 에러발생.');
+				setCart(oldCart);
+			});
+	};
+```
+
+- 결재하기 버튼에 클릭시 checkout 함수 실행.
+
+```react
+<button className='search_button checkout_button' onClick={checkout}>
+	결재하기
+</button>
+```
+
+- 상품을 장바구니에 담은뒤 결재하기를 클릭.
+
+
+![product db](https://github.com/user-attachments/assets/037f86b0-1e0d-4eef-a8f3-5d5d97ec76e9)
+
+- 바구니에 제품을 담은뒤 결재하면 주문과 동시에 장바구니 상품들이 사라짐.
+
+![product pay](https://github.com/user-attachments/assets/8e0e8555-6274-4005-8070-94ca4d9a8248)
+
+- 몽고DB에 orders 테이블에 주문이 입력.
+
+![mongo db pay](https://github.com/user-attachments/assets/03d63ac7-452f-4354-843c-6646f014c3a7)
+
+<hr>
+
+# 내 주문 페이지에 orders 데이터 가져와 표시하기
+
+- 벡엔드 서버에 저장된 내 주문들을 가져오는 요청주소
+
+```react
+ [GET] 주문 상세 가져오기 - http://localhost:5000/api/order/
+```
+
+- Get 으로 데이터를 가져오는 방법은 이미 useData.js 파일에 정의되어 있으므로 사용해서 데이터를 가져와 orders로 하기.
+
+```react
+const MyOrderPage = () => {
+	const { data: orders, error, isLoading } = useData('/order');
+```
+
+- 주문이 있을경우에만 테이블을 표시.
+
+```react
+<section className='align_center myorder_page'>
+	{orders && (
+		<Table headings={['내주문', '상품들', '결재금액', '주문상태']}>
+			<tbody>
+				{orders.map((order, index) => (
+					<tr key={index}>
+						<td>{index + 1}</td>
+						<td>iPhone, Power Bank</td>
+						<td>{order.total.toLocaleString('ko-KR')} 원</td>
+						<td>{order.status}</td>
+					</tr>
+				))}
+			</tbody>
+		</Table>
+	)}
+</section>
+​
+```
+
+![orders](https://github.com/user-attachments/assets/51ceafdb-0e57-473b-b4cb-6db91cd2a871)
+
+- orders 데이터에는 따로 제품들의 이름이 들어있지는 않다. getProductString 함수를 만들어서 주문1개에 들어있는 제품들의 이름(수량) 형식으로 문자열로 리턴.
+
+```react
+	const getProductString = (order) => {
+		const productStringArr = order.products.map((p) => `${p.product.title}(${p.quantity})`);
+		return productStringArr.join(', ');
+	};
+```
+
+```react
+<td>{getProductString(order)}</td>
+```
+
+![order](https://github.com/user-attachments/assets/5ad6bf88-cb8f-49c3-921c-b82989ef7053)
+
+<hr>
+
+# 네비게이션 가드 (라우팅 보호)를 사용해서 로그인 유저가 아니면 url 주소로 접근 못하게함.
+
+- 먼저 로그인 되어 있는 유저는 로그인/ 가입하기 페이지로 가지 않고 요청시 홈페이지로 되돌리자. App에서 props 로 user정보를 받는다.
+
+```react
+const Routing = ({ user }) => {
+	return (
+		<Routes>
+        ...
+<Route path='/signup' element={user ? <Navigate to='/' /> : <SignupPage />} />
+<Route path='/login' element={user ? <Navigate to='/' /> : <LoginPage />} />
+```
+
+![Protected](https://github.com/user-attachments/assets/08a72c74-cbf9-4e6a-92ae-9204329cbdaa)
+
+- 유저정보가 있을경우에 <Outlet /> 즉 원래 요청 페이지를 보여주고 없을경우에는 로그인 페이지로 보냄.
+
+```react
+import { Navigate, Outlet } from 'react-router-dom';
+
+const ProtectedRoute = ({ user }) => {
+	return user ? <Outlet /> : <Navigate to='/login' />;
+};
+
+export default ProtectedRoute;
+```
+
+- 이것을 라우팅 에 아래 내주문, 로그아웃 ,장바구니에 적용
+
+```react
+<Route element={<ProtectedRoute user={user} />}>
+	<Route path='/logout' element={<Logout />} />
+	<Route path='/cart' element={<CartPage />} />
+	<Route path='/myorders' element={<MyOrderPage />} />
+</Route>
+```
+
+<hr>
+
+
+# 홈페이지 대표상품 가져오기
+
+- [GET] 대표 상품 가져오기 - http://localhost:5000/api/products/featured
+
+```react
+  const FeaturedProducts = () => {
+  const { data: products, error, isLoading } = useData("products/featured");
+	const skeletons = [1, 2, 3];
+  return (
+    <section className='featured_products'>
+        <h2>주요제품</h2>
+
+        <div className='align_center featured_products_list'>
+        {error && <em className='form_error'>{error}</em>}
+        {isLoading && skeletons.map((n) => <ProductCardSkeleton key={n} />)}
+				
+				{products && !isLoading &&
+					products.map((product) => (
+					<ProductCard
+						key={product._id}
+						product={product}
+					/>
+				))}
+
+```
+
+<hr>
+
+# 홈페[이지 화면의 바로구매를 클릭시 제품 상세페이지로 이동 
+
+```react
+  <HeroSection
+        title='아이폰 14 프로 그 이상'
+        subtitle='Experience the power of the latest iPhone 14 with our most Pro camera ever.'
+        link='/product/678f0e2a4fb368143d4bb7bf'
+        image={iphone}
+    />
+
+    <FeaturedProducts />
+
+    <HeroSection
+        title='궁극의 장비를 세팅하세요'
+        subtitle='You can add Studio Display and colour-matched Magic accessories to your bag after configure your Mac mini.'
+        link='/product/678f0e2a4fb368143d4bb7c7'
+        image={mac}
+```
+
+- Herosection
+
+```react
+<Link to={link} className='hero_link'>
+					바로구매
+				</Link>
+```
+
+<hr>
+
+# 상품 검색
+
+- 1.Navbar에서 search 스테이트
+
+```react
+const [search, setSearch] = useState('');
+```
+
+- 2.검색 입력 input 에 추가할 속성
+
+```react
+검색 입력 input 에 추가할 속성
+```
+
+- 3. form에 onSubmit 속성 추가
+
+```react
+onSubmit={handleSubmit}
+```
+
+- 4. 검색버튼 누름 => submit 이벤트 발생=>handleSubmit 실행 이때 검색어가 공백이면 실행안되게 공백을 제거하고 검색어가 있을경우에 동작
+
+```react
+const handleSubmit = (e) => {
+		e.preventDefault();
+		if (search.trim() !== '') {
+			navigate(`/products?search=${search.trim()}`);
+		}
+	};
+```
+
+- 상단에 네비게이트 선언하여 리액트-라우트로 빠르게 이동.
+
+```react
+const navigate = useNavigate();
+```
+
+- 5. 결국 제품페이지를 보여주는데 검색어로 제품들이 나올수 있게 ProductsList 에서  쿼리스트링 search='검색어' 를 우선 가져오자.
+ 
+```react
+const searchQuery = search.get('search');
+```
+
+- useData에 입력하는 두번째와 세번째 내용을 수정.
+
+```react
+	{
+			params: {
+				search: searchQuery,
+				category,
+				page,
+			},
+		},
+		[searchQuery, category, page]
+```
+
+<hr>
+
+# product sosrting
+
+- ProductsList 에서 정렬방법 sortBy 와 정렬한제품들 sortedProducts를 만듬.
+
+```react
+const ProductsList = () => {
+	const [sortBy, setSortBy] = useState('');
+	const [sortedProducts, setSortedProducts] = useState([]);
+```
+
+- 상품정렬 select에 onChange 작성하여 state값을 업데이트함.
+
+```react
+<select ...
+					className='products_sorting'
+					onChange={(e) => setSortBy(e.target.value)}
+				>
+```
+
+- useEffect 를 import 하고 상품데이터를 정렬방법에 따라 sort 하여서 정렬한뒤 sortedProducts에 업데이트함. 정렬방법을 없을경우에는 상품데이터 그대로저장.
+
+```react
+	useEffect(() => {
+		if (data && data.products) {
+			const products = [...data.products];
+
+			if (sortBy === 'price desc') {
+				setSortedProducts(products.sort((a, b) => b.price - a.price));
+			} else if (sortBy === 'price asc') {
+				setSortedProducts(products.sort((a, b) => a.price - b.price));
+			} else if (sortBy === 'rate desc') {
+				setSortedProducts(products.sort((a, b) => b.reviews.rate - a.reviews.rate));
+			} else if (sortBy === 'rate asc') {
+				setSortedProducts(products.sort((a, b) => a.reviews.rate - b.reviews.rate));
+			} else {
+				setSortedProducts(products);
+			}
+		}
+	}, [sortBy, data]);
+```
+
+- 정렬된상품으로 화면을 표시.
+
+```react
+sortedProducts.map((product) => <ProductCard.../>)}
+```
